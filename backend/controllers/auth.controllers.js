@@ -44,20 +44,23 @@ const storeRefreshToken = async (uniqueId, refreshToken) => {
 // Set cookies.
 const setCookies = (res, accessToken, refreshToken) => {
     res.cookie("access_token", accessToken, {
-        httpOnly: true, //prevent XSS attack
-        secure: process.env.NODE_ENV === "production",
-        sameSite: 'strict',
+        httpOnly: false,
+        secure: true /*process.env.NODE_ENV === "production"*/,
+        sameSite: 'none',
         maxAge: 1000 * 60 * 15, // expire in 15min
+        path:"/"
     });
 
     res.cookie("refresh_token", refreshToken, {
-        httpOnly: true, //prevent XSS attack
-        secure: process.env.NODE_ENV === "production",
-        sameSite: 'strict',
+        httpOnly: false,
+        secure: true /*process.env.NODE_ENV === "production"*/,
+        sameSite: 'none',
         maxAge: 1000 * 60 * 60 * 24 * 7, // expire in 7days
+        path:"/"
     })
-}
 
+    //TODO: Modify back to production mode before deploy.
+}
 
 export const signup = async (req, res) => {
     const { username, password, email, customerName } =  req.body;
@@ -85,7 +88,11 @@ export const signup = async (req, res) => {
         return res.status(201).json({ user, message: 'User created successfully.'});
     }catch(err) {
         await rollBackSequenceValue('userId');
-        res.status(500).json({message: err.message});
+        if(err.message.includes('email')){
+            res.status(401).json({message: 'Email already exist'});
+        }else{
+            res.status(500).json({message: 'Server error', error: err.message});
+        }
     }
 }
 
@@ -152,6 +159,17 @@ export const refreshToken = async (req, res) => {
         res.json({message: 'Refresh access token successfully.'});
     }catch (err){
         res.status(500).json({message: err.message});
+    }
+}
+
+export const getProfile = async (req, res) => {
+    try {
+        // const { tokenFromUser } = req.body;
+        console.log(req.body);
+        res.status(200).json({message: "Token correct."})
+    }catch (err){
+        console.log(err);
+        res.status(500).json({message: "Something wrong."})
     }
 }
 
