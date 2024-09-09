@@ -13,6 +13,7 @@ import {Alert, AlertDescription, AlertTitle} from "@/components/ui/alert";
 import {cn} from "@/lib/utils";
 import {navigationMenuTriggerStyle} from "@/components/ui/navigation-menu";
 import {signUp} from "@/api/api";
+import {promises} from "node:dns";
 
 
 function AlertCircle(props: { className: string }) {
@@ -55,12 +56,11 @@ const SignUpPage = () => {
             setDisplayErr("hidden");
         try{
             const res = await signUp(values);
-            console.log(res);
             setDisplaySuc("block");
             setTimeout(() => {
                 router.push("/sign-in");
             },2000);
-        }catch(err){
+        }catch(err: any){
             if(err.status === 400){
                 setDisplayErr("block");
             }else if(err.status === 401){

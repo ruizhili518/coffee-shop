@@ -47,7 +47,7 @@ const Footer1 = () => {
             <div className="container">
                 <footer>
                     <Separator className="my-6"/>
-                    <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
+                    <div className="grid gap-8 px-4 md:grid-cols-2 lg:grid-cols-4 lg:px-0">
                         {sections.map((section, sectionIdx) => (
                             <div key={sectionIdx}>
                                 <h3 className="mb-4 font-bold">{section.title}</h3>

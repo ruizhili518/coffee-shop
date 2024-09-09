@@ -1,8 +1,8 @@
 "use client";
-import { Button, buttonVariants } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button';
 import {
     navigationMenuTriggerStyle,
-} from '@/components/ui/navigation-menu'
+} from '@/components/ui/navigation-menu';
 import {
     Sheet,
     SheetContent,
@@ -10,34 +10,126 @@ import {
     SheetTitle,
     SheetTrigger,
 } from '@/components/ui/sheet';
-import { cn } from '@/lib/utils'
-import { Menu } from 'lucide-react'
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { cn } from '@/lib/utils';
+import {CircleUser, Menu} from 'lucide-react';
 import Link from "next/link";
 import Image from "next/image";
-import {useAppSelector} from "@/lib/store";
-import Cookies from 'js-cookie';
-import {AuthState} from "@/lib/features/authSlice";
-import {getProfile} from "@/api/api";
-
-const refreshToken = Cookies.get('refresh_token');
-
-const getUserInfo = async (values: string) => {
-    // let userInfo: AuthState = useAppSelector((state) => state.authReducer.value);
-    if(values){
-        try {
-            const res = await getProfile(values);
-            // console.log(res);
-        }catch (err){
-            console.log(err);
-        }
-    }
-}
+import {AppDispatch, useAppSelector} from "@/lib/store";
+import {AuthState, signInAuth, signOutAuth} from "@/lib/features/authSlice";
+import {getProfile, signOut} from "@/api/api";
+import {useEffect, useState} from "react";
+import {useDispatch} from "react-redux";
 
 const Navbar1 = () => {
-    getUserInfo(refreshToken).then();
+    const dispatch = useDispatch<AppDispatch>();
+
+    // Get the user information if signed in and use store in redux slice.
+    const getUserInfo = async () => {
+        try {
+            const res = await getProfile();
+            if(res.data.user){
+                const userInfo : AuthState = {
+                    username: res.data.user.username,
+                    userId: res.data.user.userId,
+                    coupons : res.data.user.coupons,
+                    customerName : res.data.user.customerName,
+                    orderHistory: res.data.user.orderHistory,
+                    email : res.data.user.email,
+                    points : res.data.user.points,
+                    role: res.data.user.role,
+                }
+                dispatch(signInAuth(userInfo));
+            }
+        }catch (err){
+            console.log('Now user', err);
+        }
+    }
+
+    // Get user from redux.
+    let userInformation = useAppSelector((state) => state.authReducer.value);
+
+    //Set menu content and initial state of the menu.
+    const userMenu = [
+        [ "/" , "Home"], [ "/", "Menu"]
+    ];
+
+    const adminMenu = [
+        [ "/" , "Home"], [ "/", "Menu"] , [ "/" , "Order History" ]
+    ];
+
+    const superAdminMenu = [
+        [ "/" , "Home"], [ "/", "Menu"] , [ "/" , "Order History" ], [ "/" , "Manage Product" ] , [ "/", "Manage Store"]
+    ];
+
+    const [menu, setMenu] = useState(userMenu);
+
+    // Use to control if the modal shown on the page.
+    const [modal, setModal] = useState(false);
+
+    const toggleModal = () => {
+        setModal(!modal);
+    };
+
+    // Sign out handler.
+    const signOutHandler = async () => {
+        try{
+            const res = await signOut();
+            dispatch(signOutAuth());
+            toggleModal();
+            userInformation = useAppSelector((state) => state.authReducer.value);
+        }catch(err){
+            console.log(err);
+        }
+    };
+
+    // Initialization of the navbar.
+    useEffect(()=> {
+        getUserInfo();
+    }, []);
+
+    // Refresh menu item when userInformation changed.
+    useEffect(()=> {
+        if(userInformation.role === "ROLE_VISITOR" || userInformation.role === "ROLE_USER"){
+            setMenu(userMenu);
+        }else if(userInformation.role === "ROLE_ADMIN"){
+            setMenu(adminMenu);
+        }else{
+            setMenu(superAdminMenu);
+        }
+    },[userInformation]);
 
     return (
         <section className="flex justify-center py-6">
+            <AlertDialog open={modal}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Are you sure to sign out?</AlertDialogTitle>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel onClick={toggleModal}>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={signOutHandler}>Continue</AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
             <div className='container'>
                 <nav className='hidden justify-between lg:flex'>
                     <div className='flex items-center gap-6'>
@@ -48,56 +140,63 @@ const Navbar1 = () => {
                             </span>
                         </div>
                         <div className='flex items-center'>
-                            <Link
-                                className={cn(
-                                    'text-muted-foreground',
-                                    navigationMenuTriggerStyle,
-                                    buttonVariants({
-                                        variant: 'ghost',
-                                    })
-                                )}
-                                href='/'
-                            >
-                                Home
-                            </Link>
-                            <Link
-                                className={cn(
-                                    'text-muted-foreground',
-                                    navigationMenuTriggerStyle,
-                                    buttonVariants({
-                                        variant: 'ghost',
-                                    })
-                                )}
-                                href='/'
-                            >
-                                Menu
-                            </Link>
-                            <Link
-                                className={cn(
-                                    'text-muted-foreground',
-                                    navigationMenuTriggerStyle,
-                                    buttonVariants({
-                                        variant: 'ghost',
-                                    })
-                                )}
-                                href='/'
-                            >
-                                About Us
-                            </Link>
+                            {
+                                (menu.map((item) => {
+                                    return(
+                                        <Link
+                                            className={cn('text-muted-foreground', navigationMenuTriggerStyle,
+                                                buttonVariants({
+                                                    variant: 'ghost',
+                                                })
+                                            )}
+                                            href={item[0]}
+                                        >
+                                            {item[1]}
+                                        </Link>
+                                    )
+                                }))
+                            }
                         </div>
                     </div>
-                    <div className='flex gap-2'>
-                        <Link href="/sign-in">
-                        <Button variant={'outline'}>
-                                Sign in
-                        </Button>
-                        </Link>
-                        <Link href="/sign-up">
-                        <Button>Sign up</Button>
-                        </Link>
+
+                    <div>
+                        { userInformation.role !== 'ROLE_VISITOR' ?
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="secondary" size="icon" className="rounded-full">
+                                    <CircleUser className="h-5 w-5" />
+                                    <span className="sr-only">Toggle user menu</span>
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuLabel>Hi! {userInformation.customerName}</DropdownMenuLabel>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem>
+                                    Order History
+                                </DropdownMenuItem>
+                                <DropdownMenuItem>
+                                    My Account
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem onClick={toggleModal}>
+                                    Sign Out
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu> :
+                            <div className='flex gap-2'>
+                            <Link href="/sign-in">
+                                <Button variant={'outline'}>
+                                    Sign in
+                                </Button>
+                            </Link>
+                            <Link href="/sign-up">
+                            <Button>Sign up</Button>
+                            </Link>
+                            </div>
+                        }
                     </div>
                 </nav>
-                <div className='block lg:hidden'>
+                <div className='block lg:hidden px-4'>
                     <div className='flex items-center justify-between'>
                         <div className='flex items-center gap-2'>
                             <img
@@ -109,6 +208,25 @@ const Navbar1 = () => {
                                 Eunnikoo
                             </span>
                         </div>
+                        <div className="flex gap-4">
+                        { userInformation.role !== "ROLE_VISITOR" &&
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="secondary" size="icon" className="rounded-full">
+                                    <CircleUser className="h-5 w-5" />
+                                    <span className="sr-only">Toggle user menu</span>
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuLabel>Hi! {userInformation.customerName}</DropdownMenuLabel>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem>Order History</DropdownMenuItem>
+                                <DropdownMenuItem>My Account</DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem onClick={toggleModal}>Sign Out</DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                        }
                         <Sheet>
                             <SheetTrigger asChild>
                                 <Button variant={'outline'} size={'icon'}>
@@ -131,18 +249,17 @@ const Navbar1 = () => {
                                     </SheetTitle>
                                 </SheetHeader>
                                 <div className='mb-8 mt-8 flex flex-col gap-4'>
-                                    <Link href='/' className='font-semibold'>
-                                        Home
-                                    </Link>
-                                    <Link href='/' className='font-semibold'>
-                                        Menu
-                                    </Link>
-                                    <Link href='/' className='font-semibold'>
-                                        About Us
-                                    </Link>
+                                    {menu.map(item => {
+                                        return (
+                                            <Link href={item[0]} className='font-semibold'>
+                                                {item[1]}
+                                            </Link>
+                                        )
+                                    })}
                                 </div>
+                                { userInformation.role === "ROLE_VISITOR" &&
                                 <div className='border-t pt-4'>
-                                    <div className='mt-2 flex flex-col gap-3'>
+                                    <div className='mt-2 flex gap-3'>
                                         <Link href="/sign-in">
                                         <Button variant={'outline'}>
                                             Sign in
@@ -153,8 +270,10 @@ const Navbar1 = () => {
                                         </Link>
                                     </div>
                                 </div>
+                                }
                             </SheetContent>
                         </Sheet>
+                        </div>
                     </div>
                 </div>
             </div>

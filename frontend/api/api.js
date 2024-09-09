@@ -16,10 +16,17 @@ export const signUp = (value) => {
     })
 }
 
-export const getProfile = (value) => {
+export const signOut = () => {
     return http.request({
-        url: '/auth/profile',
-        method: 'POST',
-        data: value
+        url: '/auth/sign-out',
+        method: 'POST'
     })
 }
+
+export const getProfile = () => {
+    return http.request({
+        url: '/auth/profile',
+        method: 'POST'
+    })
+}
+

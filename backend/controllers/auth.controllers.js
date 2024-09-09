@@ -44,7 +44,7 @@ const storeRefreshToken = async (uniqueId, refreshToken) => {
 // Set cookies.
 const setCookies = (res, accessToken, refreshToken) => {
     res.cookie("access_token", accessToken, {
-        httpOnly: false,
+        httpOnly: true,
         secure: true /*process.env.NODE_ENV === "production"*/,
         sameSite: 'none',
         maxAge: 1000 * 60 * 15, // expire in 15min
@@ -52,7 +52,7 @@ const setCookies = (res, accessToken, refreshToken) => {
     });
 
     res.cookie("refresh_token", refreshToken, {
-        httpOnly: false,
+        httpOnly: true,
         secure: true /*process.env.NODE_ENV === "production"*/,
         sameSite: 'none',
         maxAge: 1000 * 60 * 60 * 24 * 7, // expire in 7days
@@ -116,9 +116,9 @@ export const signin = async (req, res) => {
 
 export const signout = async (req, res) => {
     try{
-        const refreshToken = req.cookies.refresh_token;
-        if(refreshToken){
-            const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+        const tokenFromUser = req.cookies.refresh_token;
+        if(tokenFromUser){
+            const decoded = jwt.verify(tokenFromUser, process.env.JWT_REFRESH_SECRET);
             await redis.del(`refresh_token:${decoded.uniqueId}`)
 
             res.clearCookie('access_token');
@@ -164,14 +164,18 @@ export const refreshToken = async (req, res) => {
 
 export const getProfile = async (req, res) => {
     try {
-        // const { tokenFromUser } = req.body;
-        console.log(req.body);
-        res.status(200).json({message: "Token correct."})
+        const tokenFromUser = req.cookies.refresh_token;
+        if(tokenFromUser) {
+            const decoded = jwt.verify(tokenFromUser, process.env.JWT_REFRESH_SECRET);
+            const uniqueId = decoded.uniqueId;
+            const user = await User.findOne({_id: uniqueId});
+            res.status(200).json({user, message: "Token correct."})
+        }else{
+            res.status(400).json({message: "Cannot find user information."})
+        }
+
     }catch (err){
         console.log(err);
         res.status(500).json({message: "Something wrong."})
     }
 }
-
-//TODO
-// getProfile function

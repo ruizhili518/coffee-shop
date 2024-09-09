@@ -31,6 +31,7 @@ const SignInPage = () => {
     const dispatch = useDispatch<AppDispatch>();
 
     const [displayErr, setDisplayErr] = useState("hidden"); // Set if the error message shown on the page.
+    const [errMessage, setErrMessage] = useState("Invalid username or password. Please log in again.")
 
     const router = useRouter(); // Use to navigate to other page.
 
@@ -68,9 +69,13 @@ const SignInPage = () => {
             dispatch(signInAuth(userInfo));
             setDisplayErr('hidden'); //Hide the error message.
             router.push('/');
-        }catch (err){
-            console.log(err);
-            setDisplayErr('block'); //Display the error message.
+        }catch (err: any){
+            if(err.status ===401){
+                setDisplayErr('block'); //Display the error message.
+            }else{
+                setErrMessage("Something went wrong with the server. Please try again later.");
+                setDisplayErr("block");
+            }
         }
     }
 
@@ -124,7 +129,7 @@ const SignInPage = () => {
                 <AlertCircle className="h-4 w-4" />
                 <AlertTitle>Error</AlertTitle>
                 <AlertDescription>
-                    Invalid username or password. Please log in again.
+                    {errMessage}
                 </AlertDescription>
             </Alert>
             <Link

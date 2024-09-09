@@ -6,7 +6,7 @@ const Hero = () => {
     return (
         <section className="flex justify-center">
             <div className='container'>
-                <div className='grid items-center gap-8 lg:grid-cols-2'>
+                <div className='grid items-center px-4 gap-8 lg:grid-cols-2 lg:px-0'>
                     <div className='flex flex-col items-center py-32 text-center lg:mx-auto lg:items-start lg:px-0 lg:text-left'>
                         <p>New Release</p>
                         <h1 className='my-6 text-pretty text-4xl font-bold lg:text-6xl'>

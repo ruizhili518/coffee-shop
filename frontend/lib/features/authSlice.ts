@@ -9,7 +9,7 @@ const initialState = {
         orderHistory: [],
         email: "",
         points: 0,
-        role: "VISITOR"
+        role: "ROLE_VISITOR"
     } as AuthState
 } as InitialState; //Set initial state of the user.
 
