@@ -41,9 +41,8 @@ import {
 
 const ProductPage = () => {
     return (
-        <div className="flex min-h-screen w-full flex-col lg:px-14">
-            <div className="container">
-            <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
+        <div className="flex min-h-screen flex-col items-center">
+            <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14 w-full lg:px-14">
                 <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
                     <Tabs defaultValue="all">
                         <div className="flex items-center">
@@ -396,7 +395,6 @@ const ProductPage = () => {
                         </TabsContent>
                     </Tabs>
                 </main>
-            </div>
             </div>
         </div>
     );

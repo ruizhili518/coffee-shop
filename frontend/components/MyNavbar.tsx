@@ -23,16 +23,15 @@ import {
     AlertDialogAction,
     AlertDialogCancel,
     AlertDialogContent,
-    AlertDialogDescription,
     AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogTitle,
-    AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { cn } from '@/lib/utils';
 import {CircleUser, Menu} from 'lucide-react';
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import {AppDispatch, useAppSelector} from "@/lib/store";
 import {AuthState, signInAuth, signOutAuth} from "@/lib/features/authSlice";
 import {getProfile, signOut} from "@/api/api";
@@ -41,6 +40,7 @@ import {useDispatch} from "react-redux";
 
 const Navbar = () => {
     const dispatch = useDispatch<AppDispatch>();
+    const router = useRouter();
 
     // Get the user information if signed in and use store in redux slice.
     const getUserInfo = async () => {
@@ -94,8 +94,8 @@ const Navbar = () => {
         try{
             const res = await signOut();
             dispatch(signOutAuth());
-            toggleModal();
-            userInformation = useAppSelector((state) => state.authReducer.value);
+            toggleModal()
+            router.push("/");
         }catch(err){
             console.log(err);
         }
@@ -119,17 +119,6 @@ const Navbar = () => {
 
     return (
         <section className="flex justify-center py-6">
-            <AlertDialog open={modal}>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>Are you sure to sign out?</AlertDialogTitle>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel onClick={toggleModal}>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={signOutHandler}>Continue</AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
             <div className='container'>
                 <nav className='hidden justify-between lg:flex'>
                     <div className='flex items-center gap-6'>
@@ -150,6 +139,7 @@ const Navbar = () => {
                                                 })
                                             )}
                                             href={item[0]}
+                                            key={item[1]}
                                         >
                                             {item[1]}
                                         </Link>
@@ -158,7 +148,6 @@ const Navbar = () => {
                             }
                         </div>
                     </div>
-
                     <div>
                         { userInformation.role !== 'ROLE_VISITOR' ?
                         <DropdownMenu>
@@ -251,7 +240,8 @@ const Navbar = () => {
                                 <div className='mb-8 mt-8 flex flex-col gap-4'>
                                     {menu.map(item => {
                                         return (
-                                            <Link href={item[0]} className='font-semibold'>
+                                            <Link href={item[0]} className='font-semibold' key={item[1]}
+                                            >
                                                 {item[1]}
                                             </Link>
                                         )
@@ -277,6 +267,17 @@ const Navbar = () => {
                     </div>
                 </div>
             </div>
+            <AlertDialog open={modal}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Are you sure to sign out?</AlertDialogTitle>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel onClick={toggleModal}>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={signOutHandler}>Continue</AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </section>
     )
 }

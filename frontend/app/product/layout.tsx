@@ -5,11 +5,11 @@ import Footer from "@/components/Footer";
 
 const ProductLayout = ({ children }: Readonly<{ children: ReactNode }>) => {
     return (
-        <section>
+        <div>
             <NavBar/>
             {children}
             <Footer/>
-        </section>
+        </div>
     );
 };
 
