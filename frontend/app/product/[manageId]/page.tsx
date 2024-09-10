@@ -32,25 +32,29 @@ import {
     TableRow,
 } from "@/components/ui/table"
 import { Textarea } from "@/components/ui/textarea"
-import {useEffect, useState} from "react";
+import { useState } from "react";
 
 const Page = ({ params }: { params: { manageId: string } }) => {
+
+    // Customization array, add and delete handler.
     const [cusItems, setCusItems] = useState([1]);
     const addHandler = () => {
         const newItem = (cusItems[cusItems.length - 1] ? cusItems[cusItems.length - 1] : 0)  + 1;
         setCusItems(prevState => [...prevState, newItem]);
     }
 
-    const deleteHandler = (e: { target: { id: string; }; }) => {
-        const btnId = parseInt(e.target.id.match(/\d+$/)[0]);
+    const deleteHandler = (event: MouseEvent) => {
+        // @ts-ignore
+        const btnId = parseInt(event.target.id.match(/\d+$/)[0]); // Get the button id (only in number) and delete it from the array.
         const index = cusItems.indexOf(btnId);
         setCusItems(prevState => [...prevState.slice(0,index),...prevState.slice(index + 1, prevState.length)]);
     }
-    useEffect(() => {
-        console.log(cusItems)
-    },[cusItems])
+    // Image array, add and delete handler.
+
+    const [img, setImg] = useState([]);
+
     return (
-        <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+        <div className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
             <div className="mx-auto grid max-w-[59rem] flex-1 auto-rows-max gap-4">
                 <div className="flex items-center gap-4">
                     <Button variant="outline" size="icon" className="h-7 w-7">
@@ -69,7 +73,8 @@ const Page = ({ params }: { params: { manageId: string } }) => {
                 </div>
                 <div className="grid gap-4 md:grid-cols-[1fr_250px] lg:grid-cols-3 lg:gap-8">
                     <div className="grid auto-rows-max items-start gap-4 lg:col-span-2 lg:gap-8">
-                        <Card x-chunk="dashboard-07-chunk-0">
+                        {/*Left three cards.*/}
+                        <Card>
                             <CardHeader>
                                 <CardTitle>Product Details</CardTitle>
                                 <CardDescription>
@@ -107,13 +112,11 @@ const Page = ({ params }: { params: { manageId: string } }) => {
                                 </div>
                             </CardContent>
                         </Card>
-                        <Card x-chunk="dashboard-07-chunk-1">
+                        <Card>
                             <CardHeader>
                                 <CardTitle>Customization</CardTitle>
                                 <CardDescription>
-                                    Edit product customization. Enter the customization name and price according to the
-                                    customization category, and customizations of the same category will be
-                                    automatically grouped.
+                                    Edit product customization. Enter the customization name and price according to the customization category, and customizations of the same category will be automatically grouped.
                                 </CardDescription>
                             </CardHeader>
                             <CardContent>
@@ -129,7 +132,7 @@ const Page = ({ params }: { params: { manageId: string } }) => {
                                     <TableBody>
                                         { cusItems.length !== 0 ? cusItems.map(item => {
                                             return(
-                                                <TableRow>
+                                                <TableRow key={item}>
                                                     <TableCell>
                                                         <Label htmlFor={`category${item}`}
                                                                className="sr-only">
@@ -162,12 +165,18 @@ const Page = ({ params }: { params: { manageId: string } }) => {
                                                         />
                                                     </TableCell>
                                                     <TableCell>
-                                                        <Button variant="outline" id={`btn${item}`} onClick={deleteHandler}>Delete</Button>
+                                                        <Button variant="outline"
+                                                                id={`btn${item}`}
+                                                                onClick={deleteHandler}>Delete</Button>
                                                     </TableCell>
                                                 </TableRow>
                                             )
                                         }):
-                                            <div>No Customization</div>
+                                            <TableRow>
+                                                <TableCell>
+                                                Press "Add Variant" to customizations.
+                                                </TableCell>
+                                            </TableRow>
                                         }
                                     </TableBody>
                                 </Table>
@@ -179,7 +188,7 @@ const Page = ({ params }: { params: { manageId: string } }) => {
                                 </Button>
                             </CardFooter>
                         </Card>
-                        <Card x-chunk="dashboard-07-chunk-2">
+                        <Card>
                             <CardHeader>
                                 <CardTitle>Product Category</CardTitle>
                             </CardHeader>
@@ -195,32 +204,12 @@ const Page = ({ params }: { params: { manageId: string } }) => {
                                                 <SelectValue placeholder="Select category"/>
                                             </SelectTrigger>
                                             <SelectContent>
-                                                <SelectItem value="clothing">Clothing</SelectItem>
-                                                <SelectItem value="electronics">
-                                                    Electronics
+                                                <SelectItem value="drinks">Drinks</SelectItem>
+                                                <SelectItem value="food">
+                                                    Food
                                                 </SelectItem>
-                                                <SelectItem value="accessories">
-                                                    Accessories
-                                                </SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                    <div className="grid gap-3">
-                                        <Label htmlFor="subcategory">
-                                            Subcategory (optional)
-                                        </Label>
-                                        <Select>
-                                            <SelectTrigger
-                                                id="subcategory"
-                                                aria-label="Select subcategory"
-                                            >
-                                                <SelectValue placeholder="Select subcategory"/>
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="t-shirts">T-Shirts</SelectItem>
-                                                <SelectItem value="hoodies">Hoodies</SelectItem>
-                                                <SelectItem value="sweatshirts">
-                                                    Sweatshirts
+                                                <SelectItem value="merchandise">
+                                                    Merchandise
                                                 </SelectItem>
                                             </SelectContent>
                                         </Select>
@@ -230,7 +219,7 @@ const Page = ({ params }: { params: { manageId: string } }) => {
                         </Card>
                     </div>
                     <div className="grid auto-rows-max items-start gap-4 lg:gap-8">
-                        <Card x-chunk="dashboard-07-chunk-3">
+                        <Card>
                             <CardHeader>
                                 <CardTitle>Product Status</CardTitle>
                             </CardHeader>
@@ -244,21 +233,19 @@ const Page = ({ params }: { params: { manageId: string } }) => {
                                             </SelectTrigger>
                                             <SelectContent>
                                                 <SelectItem value="draft">Draft</SelectItem>
-                                                <SelectItem value="published">Active</SelectItem>
-                                                <SelectItem value="archived">Archived</SelectItem>
+                                                <SelectItem value="inactive">Inactive</SelectItem>
+                                                <SelectItem value="active">Active</SelectItem>
                                             </SelectContent>
                                         </Select>
                                     </div>
                                 </div>
                             </CardContent>
                         </Card>
-                        <Card
-                            className="overflow-hidden" x-chunk="dashboard-07-chunk-4"
-                        >
+                        <Card className="overflow-hidden">
                             <CardHeader>
                                 <CardTitle>Product Images</CardTitle>
                                 <CardDescription>
-                                    Lipsum dolor sit amet, consectetur adipiscing elit
+                                    Edit product images.
                                 </CardDescription>
                             </CardHeader>
                             <CardContent>
@@ -298,18 +285,31 @@ const Page = ({ params }: { params: { manageId: string } }) => {
                                 </div>
                             </CardContent>
                         </Card>
-                        <Card x-chunk="dashboard-07-chunk-5">
+                        <Card>
                             <CardHeader>
-                                <CardTitle>Archive Product</CardTitle>
-                                <CardDescription>
-                                    Lipsum dolor sit amet, consectetur adipiscing elit.
-                                </CardDescription>
+                                <CardTitle>Promotion</CardTitle>
+                                <CardDescription>Modify promotion for the product. By default there is no promotion.</CardDescription>
                             </CardHeader>
-                            <CardContent>
-                                <div></div>
-                                <Button size="sm" variant="secondary">
-                                    Archive Product
-                                </Button>
+                            <CardContent className="flex items-center gap-1">
+                                <CardDescription>Buy</CardDescription>
+                                <Label htmlFor={"buy"} className="sr-only">
+                                    buy
+                                </Label>
+                                <Input
+                                    id={"buy"}
+                                    type="number"
+                                    placeholder={"0"}
+                                />
+                                <CardDescription>get</CardDescription>
+                                <Label htmlFor={"get"} className="sr-only">
+                                    get
+                                </Label>
+                                <Input
+                                    id={"get"}
+                                    type="number"
+                                    placeholder={"0"}
+                                />
+                                <CardDescription>free.</CardDescription>
                             </CardContent>
                         </Card>
                     </div>
@@ -321,7 +321,7 @@ const Page = ({ params }: { params: { manageId: string } }) => {
                     <Button size="sm">Save Product</Button>
                 </div>
             </div>
-        </main>
+        </div>
     );
 };
 
