@@ -39,7 +39,7 @@ import {getProfile, signOut} from "@/api/api";
 import {useEffect, useState} from "react";
 import {useDispatch} from "react-redux";
 
-const Navbar1 = () => {
+const Navbar = () => {
     const dispatch = useDispatch<AppDispatch>();
 
     // Get the user information if signed in and use store in redux slice.
@@ -281,4 +281,4 @@ const Navbar1 = () => {
     )
 }
 
-export default Navbar1
+export default Navbar

@@ -22,14 +22,21 @@ const productSchema = new mongoose.Schema({
         type: Number,
         required: [true, "Price is required"]
     },
-    customization: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'customization',
-    },
+    customizations: [
+        { customization: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Customization'}
+        }
+    ],
     getFree: {
         type: Array,
         required: true,
         default: [0,0] // Buy x get y free.
+    } ,
+    isActive: { // Shown for customers.
+        type: Boolean,
+        required: true,
+        default: false
     }
 },{
     timestamps: true

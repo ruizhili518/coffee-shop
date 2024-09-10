@@ -41,7 +41,7 @@ const sections = [
     },
 ];
 
-const Footer1 = () => {
+const Footer = () => {
     return (
         <section className="flex justify-center mb-8">
             <div className="container">
@@ -108,4 +108,4 @@ const Footer1 = () => {
     );
 };
 
-export default Footer1;
+export default Footer;
