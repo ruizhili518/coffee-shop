@@ -1,3 +1,4 @@
+"use client";
 import Image from "next/image"
 import {
     File,
@@ -38,8 +39,11 @@ import {
     TabsList,
     TabsTrigger,
 } from "@/components/ui/tabs"
+import {useRouter} from "next/navigation";
 
 const ProductPage = () => {
+    const router = useRouter();
+
     return (
         <div className="flex min-h-screen flex-col items-center">
             <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14 w-full lg:px-14">
@@ -151,7 +155,9 @@ const ProductPage = () => {
                                                         </DropdownMenuTrigger>
                                                         <DropdownMenuContent align="end">
                                                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                            <DropdownMenuItem>Edit</DropdownMenuItem>
+                                                            <DropdownMenuItem onClick={() => {
+                                                                router.push("/product/lemonade")
+                                                            }}>Edit</DropdownMenuItem>
                                                             <DropdownMenuItem>Delete</DropdownMenuItem>
                                                         </DropdownMenuContent>
                                                     </DropdownMenu>

@@ -18,7 +18,7 @@ const productSchema = new mongoose.Schema({
         type: String,
         required: [true, "Description is required"]
     },
-    lowestPrice: {
+    basePrice: {
         type: Number,
         required: [true, "Price is required"]
     },
@@ -33,10 +33,10 @@ const productSchema = new mongoose.Schema({
         required: true,
         default: [0,0] // Buy x get y free.
     } ,
-    isActive: { // Shown for customers.
-        type: Boolean,
+    status: { // Shown for customers.
+        type: String,
         required: true,
-        default: false
+        default: "draft"
     }
 },{
     timestamps: true
