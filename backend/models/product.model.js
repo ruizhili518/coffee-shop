@@ -18,7 +18,7 @@ const productSchema = new mongoose.Schema({
         type: String,
         required: [true, "Description is required"]
     },
-    basePrice: {
+    baseprice: {
         type: Number,
         required: [true, "Price is required"]
     },

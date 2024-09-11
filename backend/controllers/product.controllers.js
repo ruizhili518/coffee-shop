@@ -14,7 +14,7 @@ export const getAllProducts = async (req, res) =>{
 
 export const createProduct = async (req, res) =>{
     try{
-        const {category , name, image, description, basePrice, customization, getFree} = req.body;
+        const {category , name, image, description, baseprice, customization, getFree} = req.body;
 
         let cloudinaryRes = null;
         if(image){
@@ -26,7 +26,7 @@ export const createProduct = async (req, res) =>{
             name,
             image: cloudinaryRes?.secure_url ? cloudinaryRes?.secure_url : "",
             description,
-            basePrice,
+            baseprice,
             customization,
             getFree
         })

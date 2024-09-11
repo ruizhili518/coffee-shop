@@ -33,6 +33,18 @@ import {
 } from "@/components/ui/table"
 import { Textarea } from "@/components/ui/textarea"
 import { useState } from "react";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import {
+    Form,
+    FormControl,
+    FormDescription,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from "@/components/ui/form"
+import {zodResolver} from "@hookform/resolvers/zod";
 
 const Page = ({ params }: { params: { manageId: string } }) => {
 
@@ -50,19 +62,47 @@ const Page = ({ params }: { params: { manageId: string } }) => {
         setCusItems(prevState => [...prevState.slice(0,index),...prevState.slice(index + 1, prevState.length)]);
     }
     // Image array, add and delete handler.
-
     const [img, setImg] = useState([]);
+
+    // Form design.
+    const formSchema = z.object({
+        name: z.string().min(1, {
+            message: "Product name is required",
+        }),
+        description: z.string().min(1,{
+            message: "Product description is required",
+        }),
+        baseprice: z.number().min(0,{
+            message: "Base price is required and must be positive."
+        }),
+        customizations: z.array<object>(),
+        getFree: z.array<number>().default([0,0])
+    });
+
+    const form = useForm<z.infer<typeof formSchema>>({
+        resolver: zodResolver(formSchema),
+        defaultValues: {
+            name: "",
+            description: "",
+            baseprice: 0
+        },
+    })
+
+    const onSubmit = (values: z.infer<typeof formSchema>) => {
+        console.log(values);
+    }
 
     return (
         <div className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
             <div className="mx-auto grid max-w-[59rem] flex-1 auto-rows-max gap-4">
+
                 <div className="flex items-center gap-4">
                     <Button variant="outline" size="icon" className="h-7 w-7">
                         <ChevronLeft className="h-4 w-4"/>
                         <span className="sr-only">Back</span>
                     </Button>
                     <h1 className="flex-1 shrink-0 whitespace-nowrap text-xl font-semibold tracking-tight sm:grow-0">
-                        Manage Product
+                        Add New Product
                     </h1>
                     <div className="hidden items-center gap-2 md:ml-auto md:flex">
                         <Button variant="outline" size="sm">
@@ -76,7 +116,7 @@ const Page = ({ params }: { params: { manageId: string } }) => {
                         {/*Left three cards.*/}
                         <Card>
                             <CardHeader>
-                                <CardTitle>Product Details</CardTitle>
+                                <CardTitle>Details</CardTitle>
                                 <CardDescription>
                                     Edit product name and description.
                                 </CardDescription>
@@ -102,12 +142,7 @@ const Page = ({ params }: { params: { manageId: string } }) => {
                                     </div>
                                     <div className="grid gap-3">
                                         <Label htmlFor="baseprice">Base Price</Label>
-                                        <Input
-                                            id="baseprice"
-                                            type="number"
-                                            className="w-full"
-                                            placeholder="e.g 6.99"
-                                        />
+                                        <Input id="baseprice" type="number" className="w-full" placeholder="e.g 6.99"/>
                                     </div>
                                 </div>
                             </CardContent>
@@ -116,7 +151,9 @@ const Page = ({ params }: { params: { manageId: string } }) => {
                             <CardHeader>
                                 <CardTitle>Customization</CardTitle>
                                 <CardDescription>
-                                    Edit product customization. Enter the customization name and price according to the customization category, and customizations of the same category will be automatically grouped.
+                                    Edit product customization. Enter the customization name and price according to the
+                                    customization category, and customizations of the same category will be
+                                    automatically grouped.
                                 </CardDescription>
                             </CardHeader>
                             <CardContent>
@@ -130,51 +167,51 @@ const Page = ({ params }: { params: { manageId: string } }) => {
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                        { cusItems.length !== 0 ? cusItems.map(item => {
-                                            return(
-                                                <TableRow key={item}>
-                                                    <TableCell>
-                                                        <Label htmlFor={`category${item}`}
-                                                               className="sr-only">
-                                                            category
-                                                        </Label>
-                                                        <Input
-                                                            id={`category${item}`}
-                                                            type="text"
-                                                            placeholder="e.g size"
-                                                        />
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        <Label htmlFor={`name${item}`} className="sr-only">
-                                                            name
-                                                        </Label>
-                                                        <Input
-                                                            id={`name${item}`}
-                                                            type="text"
-                                                            placeholder="e.g large"
-                                                        />
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        <Label htmlFor={`price${item}`} className="sr-only">
-                                                            price
-                                                        </Label>
-                                                        <Input
-                                                            id={`price${item}`}
-                                                            type="number"
-                                                            placeholder="e.g 0.5"
-                                                        />
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        <Button variant="outline"
-                                                                id={`btn${item}`}
-                                                                onClick={deleteHandler}>Delete</Button>
-                                                    </TableCell>
-                                                </TableRow>
-                                            )
-                                        }):
+                                        {cusItems.length !== 0 ? cusItems.map(item => {
+                                                return (
+                                                    <TableRow key={item}>
+                                                        <TableCell>
+                                                            <Label htmlFor={`category${item}`}
+                                                                   className="sr-only">
+                                                                category
+                                                            </Label>
+                                                            <Input
+                                                                id={`category${item}`}
+                                                                type="text"
+                                                                placeholder="e.g size"
+                                                            />
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <Label htmlFor={`name${item}`} className="sr-only">
+                                                                name
+                                                            </Label>
+                                                            <Input
+                                                                id={`name${item}`}
+                                                                type="text"
+                                                                placeholder="e.g large"
+                                                            />
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <Label htmlFor={`price${item}`} className="sr-only">
+                                                                price
+                                                            </Label>
+                                                            <Input
+                                                                id={`price${item}`}
+                                                                type="number"
+                                                                placeholder="e.g 0.5"
+                                                            />
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <Button variant="outline"
+                                                                    id={`btn${item}`}
+                                                                    onClick={deleteHandler}>Delete</Button>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                )
+                                            }) :
                                             <TableRow>
                                                 <TableCell>
-                                                Press "Add Variant" to customizations.
+                                                    Press "Add Variant" to customizations.
                                                 </TableCell>
                                             </TableRow>
                                         }
@@ -190,7 +227,7 @@ const Page = ({ params }: { params: { manageId: string } }) => {
                         </Card>
                         <Card>
                             <CardHeader>
-                                <CardTitle>Product Category</CardTitle>
+                                <CardTitle>Category</CardTitle>
                             </CardHeader>
                             <CardContent>
                                 <div className="grid gap-6 sm:grid-cols-3">
@@ -219,9 +256,10 @@ const Page = ({ params }: { params: { manageId: string } }) => {
                         </Card>
                     </div>
                     <div className="grid auto-rows-max items-start gap-4 lg:gap-8">
+                        {/*Right three cards.*/}
                         <Card>
                             <CardHeader>
-                                <CardTitle>Product Status</CardTitle>
+                                <CardTitle>Status</CardTitle>
                             </CardHeader>
                             <CardContent>
                                 <div className="grid gap-6">
@@ -243,7 +281,7 @@ const Page = ({ params }: { params: { manageId: string } }) => {
                         </Card>
                         <Card className="overflow-hidden">
                             <CardHeader>
-                                <CardTitle>Product Images</CardTitle>
+                                <CardTitle>Images</CardTitle>
                                 <CardDescription>
                                     Edit product images.
                                 </CardDescription>
@@ -258,24 +296,6 @@ const Page = ({ params }: { params: { manageId: string } }) => {
                                         width="300"
                                     />
                                     <div className="grid grid-cols-3 gap-2">
-                                        <button>
-                                            <Image
-                                                alt="Product image"
-                                                className="aspect-square w-full rounded-md object-cover"
-                                                height="84"
-                                                src="/placeholder.svg"
-                                                width="84"
-                                            />
-                                        </button>
-                                        <button>
-                                            <Image
-                                                alt="Product image"
-                                                className="aspect-square w-full rounded-md object-cover"
-                                                height="84"
-                                                src="/placeholder.svg"
-                                                width="84"
-                                            />
-                                        </button>
                                         <button
                                             className="flex aspect-square w-full items-center justify-center rounded-md border border-dashed">
                                             <Upload className="h-4 w-4 text-muted-foreground"/>
@@ -288,7 +308,8 @@ const Page = ({ params }: { params: { manageId: string } }) => {
                         <Card>
                             <CardHeader>
                                 <CardTitle>Promotion</CardTitle>
-                                <CardDescription>Modify promotion for the product. By default there is no promotion.</CardDescription>
+                                <CardDescription>Modify promotion for the product. By default there is no
+                                    promotion.</CardDescription>
                             </CardHeader>
                             <CardContent className="flex items-center gap-1">
                                 <CardDescription>Buy</CardDescription>
@@ -318,7 +339,7 @@ const Page = ({ params }: { params: { manageId: string } }) => {
                     <Button variant="outline" size="sm">
                         Discard
                     </Button>
-                    <Button size="sm">Save Product</Button>
+                    <Button size="sm" type="submit">Save Product</Button>
                 </div>
             </div>
         </div>
