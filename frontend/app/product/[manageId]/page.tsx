@@ -61,22 +61,32 @@ const Page = ({ params }: { params: { manageId: string } }) => {
         const index = cusItems.indexOf(btnId);
         setCusItems(prevState => [...prevState.slice(0,index),...prevState.slice(index + 1, prevState.length)]);
     }
-    // Image array, add and delete handler.
-    const [img, setImg] = useState([]);
+    // // Image array, add and delete handler.
+    // const [img, setImg] = useState("[]");
 
     // Form design.
     const formSchema = z.object({
         name: z.string().min(1, {
-            message: "Product name is required",
+            message: "Product name is required.",
         }),
         description: z.string().min(1,{
-            message: "Product description is required",
+            message: "Product description is required.",
         }),
-        baseprice: z.number().min(0,{
-            message: "Base price is required and must be positive."
+        baseprice: z.number(),
+        cusCategory: z.string(),
+        cusName: z.string(),
+        extraprice: z.number(),
+        buy: z.number(),
+        get: z.number(),
+        status: z.string().min(1, {
+            message: "Product status is required."
         }),
-        customizations: z.array<object>(),
-        getFree: z.array<number>().default([0,0])
+        category: z.string().min(1, {
+            message: "Product category is required.",
+        }),
+        image: z.string().min(1,{
+            message: "Product image is required.",
+        }),
     });
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -84,7 +94,15 @@ const Page = ({ params }: { params: { manageId: string } }) => {
         defaultValues: {
             name: "",
             description: "",
-            baseprice: 0
+            baseprice: 0,
+            cusCategory: "",
+            cusName: "",
+            extraprice: 0,
+            buy: 0,
+            get: 0,
+            status: "draft",
+            category: "",
+            image: ""
         },
     })
 
@@ -94,8 +112,8 @@ const Page = ({ params }: { params: { manageId: string } }) => {
 
     return (
         <div className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
-            <div className="mx-auto grid max-w-[59rem] flex-1 auto-rows-max gap-4">
-
+            <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="mx-auto grid max-w-[59rem] flex-1 auto-rows-max gap-4">
                 <div className="flex items-center gap-4">
                     <Button variant="outline" size="icon" className="h-7 w-7">
                         <ChevronLeft className="h-4 w-4"/>
@@ -108,7 +126,7 @@ const Page = ({ params }: { params: { manageId: string } }) => {
                         <Button variant="outline" size="sm">
                             Discard
                         </Button>
-                        <Button size="sm">Save Product</Button>
+                        <Button size="sm" type="submit">Save Product</Button>
                     </div>
                 </div>
                 <div className="grid gap-4 md:grid-cols-[1fr_250px] lg:grid-cols-3 lg:gap-8">
@@ -125,24 +143,62 @@ const Page = ({ params }: { params: { manageId: string } }) => {
                                 <div className="grid gap-6">
                                     <div className="grid gap-3">
                                         <Label htmlFor="name">Name</Label>
-                                        <Input
-                                            id="name"
-                                            type="text"
-                                            className="w-full"
-                                            placeholder="e.g Americano"
+                                        <FormField
+                                            control={form.control}
+                                            name="name"
+                                            render={({field}) => (
+                                                <FormItem>
+                                                    <FormControl>
+                                                        <Input
+                                                            id="name"
+                                                            type="text"
+                                                            className="w-full"
+                                                            placeholder="e.g Americano"
+                                                            {...field}
+                                                        />
+                                                    </FormControl>
+                                                    <FormMessage/>
+                                                </FormItem>
+                                            )}
                                         />
                                     </div>
                                     <div className="grid gap-3">
                                         <Label htmlFor="description">Description</Label>
-                                        <Textarea
-                                            id="description"
-                                            placeholder="e.g Double espresso, refreshingly invigorating, cooling you all summer."
-                                            className="min-h-20"
+                                        <FormField
+                                            control={form.control}
+                                            name="description"
+                                            render={({field}) => (
+                                                <FormItem>
+                                                    <FormControl>
+                                                        <Textarea
+                                                            id="description"
+                                                            placeholder="e.g Double espresso, refreshingly invigorating, cooling you all summer."
+                                                            className="min-h-20"
+                                                            {...field}
+                                                        />
+                                                    </FormControl>
+                                                    <FormMessage/>
+                                                </FormItem>
+                                            )}
                                         />
                                     </div>
                                     <div className="grid gap-3">
                                         <Label htmlFor="baseprice">Base Price</Label>
-                                        <Input id="baseprice" type="number" className="w-full" placeholder="e.g 6.99"/>
+                                        <FormField
+                                            control={form.control}
+                                            name="baseprice"
+                                            render={({field}) => (
+                                                <FormItem>
+                                                    <FormControl>
+                                                        <Input
+                                                            id="baseprice" type="number" className="w-full"
+                                                            {...field}
+                                                        />
+                                                    </FormControl>
+                                                    <FormMessage/>
+                                                </FormItem>
+                                            )}
+                                        />
                                     </div>
                                 </div>
                             </CardContent>
@@ -171,40 +227,75 @@ const Page = ({ params }: { params: { manageId: string } }) => {
                                                 return (
                                                     <TableRow key={item}>
                                                         <TableCell>
-                                                            <Label htmlFor={`category${item}`}
+                                                            <Label htmlFor={`cusCategory${item}`}
                                                                    className="sr-only">
                                                                 category
                                                             </Label>
-                                                            <Input
-                                                                id={`category${item}`}
-                                                                type="text"
-                                                                placeholder="e.g size"
+                                                            <FormField
+                                                                control={form.control}
+                                                                name="cusCategory"
+                                                                render={({field}) => (
+                                                                    <FormItem>
+                                                                        <FormControl>
+                                                                            <Input
+                                                                                id={`cusCategory${item}`}
+                                                                                type="text"
+                                                                                placeholder="e.g size"
+                                                                                {...field}
+                                                                            />
+                                                                        </FormControl>
+                                                                        <FormMessage/>
+                                                                    </FormItem>
+                                                                )}
                                                             />
                                                         </TableCell>
                                                         <TableCell>
                                                             <Label htmlFor={`name${item}`} className="sr-only">
                                                                 name
                                                             </Label>
-                                                            <Input
-                                                                id={`name${item}`}
-                                                                type="text"
-                                                                placeholder="e.g large"
+                                                            <FormField
+                                                                control={form.control}
+                                                                name="cusName"
+                                                                render={({field}) => (
+                                                                    <FormItem>
+                                                                        <FormControl>
+                                                                            <Input
+                                                                                id={`cusName${item}`}
+                                                                                type="text"
+                                                                                placeholder="e.g large"
+                                                                                {...field}
+                                                                            />
+                                                                        </FormControl>
+                                                                        <FormMessage/>
+                                                                    </FormItem>
+                                                                )}
                                                             />
                                                         </TableCell>
                                                         <TableCell>
                                                             <Label htmlFor={`price${item}`} className="sr-only">
                                                                 price
                                                             </Label>
-                                                            <Input
-                                                                id={`price${item}`}
-                                                                type="number"
-                                                                placeholder="e.g 0.5"
+                                                            <FormField
+                                                                control={form.control}
+                                                                name="extraprice"
+                                                                render={({field}) => (
+                                                                    <FormItem>
+                                                                        <FormControl>
+                                                                            <Input
+                                                                                id={`extraprice${item}`}
+                                                                                type="number"
+                                                                                placeholder="e.g 0.5"
+                                                                                {...field}
+                                                                            />
+                                                                        </FormControl>
+                                                                        <FormMessage/>
+                                                                    </FormItem>
+                                                                )}
                                                             />
                                                         </TableCell>
                                                         <TableCell>
                                                             <Button variant="outline"
-                                                                    id={`btn${item}`}
-                                                                    onClick={deleteHandler}>Delete</Button>
+                                                                    id={`btn${item}`} onClick={deleteHandler}>Delete</Button>
                                                         </TableCell>
                                                     </TableRow>
                                                 )
@@ -233,23 +324,34 @@ const Page = ({ params }: { params: { manageId: string } }) => {
                                 <div className="grid gap-6 sm:grid-cols-3">
                                     <div className="grid gap-3">
                                         <Label htmlFor="category">Category</Label>
-                                        <Select>
-                                            <SelectTrigger
-                                                id="category"
-                                                aria-label="Select category"
-                                            >
-                                                <SelectValue placeholder="Select category"/>
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="drinks">Drinks</SelectItem>
-                                                <SelectItem value="food">
-                                                    Food
-                                                </SelectItem>
-                                                <SelectItem value="merchandise">
-                                                    Merchandise
-                                                </SelectItem>
-                                            </SelectContent>
-                                        </Select>
+                                        <FormField
+                                            control={form.control}
+                                            name="category"
+                                            render={({field}) => (
+                                                <FormItem>
+                                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                    <FormControl>
+                                                        <SelectTrigger
+                                                            id="category"
+                                                            aria-label="Select category"
+                                                        >
+                                                            <SelectValue placeholder="Select category"/>
+                                                        </SelectTrigger>
+                                                    </FormControl>
+                                                        <SelectContent>
+                                                            <SelectItem value="drinks">Drinks</SelectItem>
+                                                            <SelectItem value="food">
+                                                                Food
+                                                            </SelectItem>
+                                                            <SelectItem value="merchandise">
+                                                                Merchandise
+                                                            </SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                    <FormMessage/>
+                                                </FormItem>
+                                            )}
+                                        />
                                     </div>
                                 </div>
                             </CardContent>
@@ -265,16 +367,27 @@ const Page = ({ params }: { params: { manageId: string } }) => {
                                 <div className="grid gap-6">
                                     <div className="grid gap-3">
                                         <Label htmlFor="status">Status</Label>
-                                        <Select>
-                                            <SelectTrigger id="status" aria-label="Select status">
-                                                <SelectValue placeholder="Select status"/>
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="draft">Draft</SelectItem>
-                                                <SelectItem value="inactive">Inactive</SelectItem>
-                                                <SelectItem value="active">Active</SelectItem>
-                                            </SelectContent>
-                                        </Select>
+                                        <FormField
+                                            control={form.control}
+                                            name="status"
+                                            render={({field}) => (
+                                                <FormItem>
+                                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                        <FormControl>
+                                                            <SelectTrigger id="status" aria-label="Select status">
+                                                                <SelectValue placeholder="Select status"/>
+                                                            </SelectTrigger>
+                                                        </FormControl>
+                                                        <SelectContent>
+                                                            <SelectItem value="draft">Draft</SelectItem>
+                                                            <SelectItem value="inactive">Inactive</SelectItem>
+                                                            <SelectItem value="active">Active</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                    <FormMessage/>
+                                                </FormItem>
+                                            )}
+                                        />
                                     </div>
                                 </div>
                             </CardContent>
@@ -299,8 +412,25 @@ const Page = ({ params }: { params: { manageId: string } }) => {
                                         <button
                                             className="flex aspect-square w-full items-center justify-center rounded-md border border-dashed">
                                             <Upload className="h-4 w-4 text-muted-foreground"/>
+
                                             <span className="sr-only">Upload</span>
                                         </button>
+                                        <FormField
+                                            control={form.control}
+                                            name="image"
+                                            render={({field}) => (
+                                                <FormItem>
+                                                    <FormControl>
+                                                        <Input
+                                                            id="image"
+                                                            type="text"
+                                                            className="w-full"
+                                                            {...field}
+                                                        />
+                                                    </FormControl>
+                                                </FormItem>
+                                            )}
+                                        />
                                     </div>
                                 </div>
                             </CardContent>
@@ -316,19 +446,41 @@ const Page = ({ params }: { params: { manageId: string } }) => {
                                 <Label htmlFor={"buy"} className="sr-only">
                                     buy
                                 </Label>
-                                <Input
-                                    id={"buy"}
-                                    type="number"
-                                    placeholder={"0"}
+                                <FormField
+                                    control={form.control}
+                                    name="buy"
+                                    render={({field}) => (
+                                        <FormItem>
+                                            <FormControl>
+                                                <Input
+                                                    id="buy"
+                                                    type="number"
+                                                    placeholder="0"
+                                                    {...field}
+                                                />
+                                            </FormControl>
+                                        </FormItem>
+                                    )}
                                 />
                                 <CardDescription>get</CardDescription>
                                 <Label htmlFor={"get"} className="sr-only">
                                     get
                                 </Label>
-                                <Input
-                                    id={"get"}
-                                    type="number"
-                                    placeholder={"0"}
+                                <FormField
+                                    control={form.control}
+                                    name="get"
+                                    render={({field}) => (
+                                        <FormItem>
+                                            <FormControl>
+                                                <Input
+                                                    id="get"
+                                                    type="number"
+                                                    placeholder="0"
+                                                    {...field}
+                                                />
+                                            </FormControl>
+                                        </FormItem>
+                                    )}
                                 />
                                 <CardDescription>free.</CardDescription>
                             </CardContent>
@@ -341,7 +493,8 @@ const Page = ({ params }: { params: { manageId: string } }) => {
                     </Button>
                     <Button size="sm" type="submit">Save Product</Button>
                 </div>
-            </div>
+                </form>
+           </Form>
         </div>
     );
 };

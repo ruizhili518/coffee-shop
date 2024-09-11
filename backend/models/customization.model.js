@@ -1,13 +1,14 @@
 import mongoose from "mongoose";
 
 const customizationSchema = new mongoose.Schema({
-    name: {
+    cusCategory: {
         type: String,
-        required: [true, "Name is required"]
     },
-    detail: {
-        type: Array,
-        default: [] // Detail name and extra price.
+    cusName: {
+        type: String,
+    },
+    extraprice: {
+        type: Number,
     }
 })
 
