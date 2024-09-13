@@ -32,39 +32,25 @@ import {
     TableRow,
 } from "@/components/ui/table"
 import { Textarea } from "@/components/ui/textarea"
-import { useState } from "react";
 import { z } from "zod";
-import { useForm } from "react-hook-form";
+import {FormProvider, useFieldArray, useForm} from "react-hook-form";
 import {
-    Form,
     FormControl,
-    FormDescription,
     FormField,
     FormItem,
-    FormLabel,
     FormMessage,
 } from "@/components/ui/form"
-import {zodResolver} from "@hookform/resolvers/zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {useRef, useState} from "react";
 
 const Page = ({ params }: { params: { manageId: string } }) => {
-
-    // Customization array, add and delete handler.
-    const [cusItems, setCusItems] = useState([1]);
-    const addHandler = () => {
-        const newItem = (cusItems[cusItems.length - 1] ? cusItems[cusItems.length - 1] : 0)  + 1;
-        setCusItems(prevState => [...prevState, newItem]);
-    }
-
-    const deleteHandler = (event: MouseEvent) => {
-        // @ts-ignore
-        const btnId = parseInt(event.target.id.match(/\d+$/)[0]); // Get the button id (only in number) and delete it from the array.
-        const index = cusItems.indexOf(btnId);
-        setCusItems(prevState => [...prevState.slice(0,index),...prevState.slice(index + 1, prevState.length)]);
-    }
-    // // Image array, add and delete handler.
-    // const [img, setImg] = useState("[]");
-
     // Form design.
+    const customizationSchema = z.object({
+        cusCategory: z.string(),
+        cusName: z.string(),
+        extraprice: z.string(),
+    });
+
     const formSchema = z.object({
         name: z.string().min(1, {
             message: "Product name is required.",
@@ -72,48 +58,69 @@ const Page = ({ params }: { params: { manageId: string } }) => {
         description: z.string().min(1,{
             message: "Product description is required.",
         }),
-        baseprice: z.number(),
-        cusCategory: z.string(),
-        cusName: z.string(),
-        extraprice: z.number(),
-        buy: z.number(),
-        get: z.number(),
+        baseprice: z.string().min(1,{
+            message: "Product base price is required.",
+        }),
+        customizations: z.array(customizationSchema),
+        buy: z.string(),
+        get: z.string(),
         status: z.string().min(1, {
             message: "Product status is required."
         }),
         category: z.string().min(1, {
             message: "Product category is required.",
         }),
-        image: z.string().min(1,{
-            message: "Product image is required.",
-        }),
     });
 
-    const form = useForm<z.infer<typeof formSchema>>({
+    type FormValues = z.infer<typeof formSchema>;
+
+    const methods = useForm<FormValues>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            name: "",
-            description: "",
-            baseprice: 0,
-            cusCategory: "",
-            cusName: "",
-            extraprice: 0,
-            buy: 0,
-            get: 0,
-            status: "draft",
-            category: "",
-            image: ""
-        },
-    })
+            customizations: [{}] // Start with one empty customer pricing group
+        }
+    });
 
-    const onSubmit = (values: z.infer<typeof formSchema>) => {
+    const { control , handleSubmit, setValue, formState: { errors } } = methods;
+
+    const { fields, append, remove } = useFieldArray({
+        control,
+        name: "customizations"
+    });
+
+    const onSubmit = (values: FormValues) => {
         console.log(values);
     }
 
+    // Image state (both file and previewURL)
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [previewURL, setPreviewURL] = useState(null);
+
+    // Handle image upload
+    const handleImageUpload = (e) => {
+        const file = e.target.files[0]; // Get the uploaded file
+        if (file) {
+            // Set the selected file to state
+            setSelectedFile(file);
+
+            // Create a preview URL for the uploaded image
+            const imageURL = URL.createObjectURL(file);
+            setPreviewURL(imageURL);
+        }
+    };
+
+    // Ref to the hidden file input
+    const fileInputRef = useRef(null);
+
+    const triggerFileInput = () => {
+        fileInputRef.current.click(); // Open file dialog
+    };
+
     return (
+
         <div className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
-            <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="mx-auto grid max-w-[59rem] flex-1 auto-rows-max gap-4">
+            <FormProvider {...methods}>
+            <form onSubmit={handleSubmit(onSubmit)} className="mx-auto grid max-w-[59rem] flex-1 auto-rows-max gap-4">
                 <div className="flex items-center gap-4">
                     <Button variant="outline" size="icon" className="h-7 w-7">
                         <ChevronLeft className="h-4 w-4"/>
@@ -144,7 +151,7 @@ const Page = ({ params }: { params: { manageId: string } }) => {
                                     <div className="grid gap-3">
                                         <Label htmlFor="name">Name</Label>
                                         <FormField
-                                            control={form.control}
+                                            control={control}
                                             name="name"
                                             render={({field}) => (
                                                 <FormItem>
@@ -165,7 +172,7 @@ const Page = ({ params }: { params: { manageId: string } }) => {
                                     <div className="grid gap-3">
                                         <Label htmlFor="description">Description</Label>
                                         <FormField
-                                            control={form.control}
+                                            control={control}
                                             name="description"
                                             render={({field}) => (
                                                 <FormItem>
@@ -185,13 +192,13 @@ const Page = ({ params }: { params: { manageId: string } }) => {
                                     <div className="grid gap-3">
                                         <Label htmlFor="baseprice">Base Price</Label>
                                         <FormField
-                                            control={form.control}
+                                            control={control}
                                             name="baseprice"
                                             render={({field}) => (
                                                 <FormItem>
                                                     <FormControl>
                                                         <Input
-                                                            id="baseprice" type="number" className="w-full"
+                                                            id="baseprice" type="text" className="w-full"
                                                             {...field}
                                                         />
                                                     </FormControl>
@@ -223,22 +230,22 @@ const Page = ({ params }: { params: { manageId: string } }) => {
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                        {cusItems.length !== 0 ? cusItems.map(item => {
+                                        {fields.length !== 0 ? fields.map((field, index) => {
                                                 return (
-                                                    <TableRow key={item}>
+                                                    <TableRow key={field.id}>
                                                         <TableCell>
-                                                            <Label htmlFor={`cusCategory${item}`}
+                                                            <Label htmlFor={`customizations.${index}.cusCategory`}
                                                                    className="sr-only">
                                                                 category
                                                             </Label>
                                                             <FormField
-                                                                control={form.control}
-                                                                name="cusCategory"
+                                                                control={control}
+                                                                name={`customizations.${index}.cusCategory`}
                                                                 render={({field}) => (
                                                                     <FormItem>
                                                                         <FormControl>
                                                                             <Input
-                                                                                id={`cusCategory${item}`}
+                                                                                id={`customizations.${index}.cusCategory`}
                                                                                 type="text"
                                                                                 placeholder="e.g size"
                                                                                 {...field}
@@ -250,17 +257,17 @@ const Page = ({ params }: { params: { manageId: string } }) => {
                                                             />
                                                         </TableCell>
                                                         <TableCell>
-                                                            <Label htmlFor={`name${item}`} className="sr-only">
+                                                            <Label htmlFor={`customizations.${index}.cusName`} className="sr-only">
                                                                 name
                                                             </Label>
                                                             <FormField
-                                                                control={form.control}
-                                                                name="cusName"
+                                                                control={control}
+                                                                name={`customizations.${index}.cusName`}
                                                                 render={({field}) => (
                                                                     <FormItem>
                                                                         <FormControl>
                                                                             <Input
-                                                                                id={`cusName${item}`}
+                                                                                id={`customizations.${index}.cusName`}
                                                                                 type="text"
                                                                                 placeholder="e.g large"
                                                                                 {...field}
@@ -272,18 +279,18 @@ const Page = ({ params }: { params: { manageId: string } }) => {
                                                             />
                                                         </TableCell>
                                                         <TableCell>
-                                                            <Label htmlFor={`price${item}`} className="sr-only">
+                                                            <Label htmlFor={`customizations.${index}.extraprice`} className="sr-only">
                                                                 price
                                                             </Label>
                                                             <FormField
-                                                                control={form.control}
-                                                                name="extraprice"
+                                                                control={control}
+                                                                name={`customizations.${index}.extraprice`}
                                                                 render={({field}) => (
                                                                     <FormItem>
                                                                         <FormControl>
                                                                             <Input
-                                                                                id={`extraprice${item}`}
-                                                                                type="number"
+                                                                                id={`customizations.${index}.extraprice`}
+                                                                                type="text"
                                                                                 placeholder="e.g 0.5"
                                                                                 {...field}
                                                                             />
@@ -295,7 +302,7 @@ const Page = ({ params }: { params: { manageId: string } }) => {
                                                         </TableCell>
                                                         <TableCell>
                                                             <Button variant="outline"
-                                                                    id={`btn${item}`} onClick={deleteHandler}>Delete</Button>
+                                                                    id={`btn${index}`} onClick={() => remove(index)}>Delete</Button>
                                                         </TableCell>
                                                     </TableRow>
                                                 )
@@ -310,7 +317,7 @@ const Page = ({ params }: { params: { manageId: string } }) => {
                                 </Table>
                             </CardContent>
                             <CardFooter className="justify-center border-t p-4">
-                                <Button size="sm" variant="ghost" className="gap-1" onClick={addHandler}>
+                                <Button size="sm" variant="ghost" className="gap-1" onClick={() => append({cusCategory: "",cusName: "",extraprice: ""})}>
                                     <PlusCircle className="h-3.5 w-3.5"/>
                                     Add Variant
                                 </Button>
@@ -325,7 +332,7 @@ const Page = ({ params }: { params: { manageId: string } }) => {
                                     <div className="grid gap-3">
                                         <Label htmlFor="category">Category</Label>
                                         <FormField
-                                            control={form.control}
+                                            control={control}
                                             name="category"
                                             render={({field}) => (
                                                 <FormItem>
@@ -368,7 +375,7 @@ const Page = ({ params }: { params: { manageId: string } }) => {
                                     <div className="grid gap-3">
                                         <Label htmlFor="status">Status</Label>
                                         <FormField
-                                            control={form.control}
+                                            control={control}
                                             name="status"
                                             render={({field}) => (
                                                 <FormItem>
@@ -403,34 +410,24 @@ const Page = ({ params }: { params: { manageId: string } }) => {
                                 <div className="grid gap-2">
                                     <Image
                                         alt="Product image"
-                                        className="aspect-square w-full rounded-md object-cover"
+                                        className="aspect-square w-full rounded-md object-contain"
                                         height="300"
-                                        src="/placeholder.svg"
+                                        src={previewURL? previewURL : '/placeholder.svg'}
                                         width="300"
                                     />
                                     <div className="grid grid-cols-3 gap-2">
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={handleImageUpload}
+                                            className="hidden"
+                                            ref={fileInputRef}
+                                        />
                                         <button
-                                            className="flex aspect-square w-full items-center justify-center rounded-md border border-dashed">
+                                            className="flex aspect-square w-full items-center justify-center rounded-md border border-dashed" onClick={triggerFileInput}>
                                             <Upload className="h-4 w-4 text-muted-foreground"/>
-
                                             <span className="sr-only">Upload</span>
                                         </button>
-                                        <FormField
-                                            control={form.control}
-                                            name="image"
-                                            render={({field}) => (
-                                                <FormItem>
-                                                    <FormControl>
-                                                        <Input
-                                                            id="image"
-                                                            type="text"
-                                                            className="w-full"
-                                                            {...field}
-                                                        />
-                                                    </FormControl>
-                                                </FormItem>
-                                            )}
-                                        />
                                     </div>
                                 </div>
                             </CardContent>
@@ -447,18 +444,19 @@ const Page = ({ params }: { params: { manageId: string } }) => {
                                     buy
                                 </Label>
                                 <FormField
-                                    control={form.control}
+                                    control={control}
                                     name="buy"
                                     render={({field}) => (
                                         <FormItem>
                                             <FormControl>
                                                 <Input
                                                     id="buy"
-                                                    type="number"
+                                                    type="text"
                                                     placeholder="0"
                                                     {...field}
                                                 />
                                             </FormControl>
+                                            <FormMessage/>
                                         </FormItem>
                                     )}
                                 />
@@ -467,18 +465,19 @@ const Page = ({ params }: { params: { manageId: string } }) => {
                                     get
                                 </Label>
                                 <FormField
-                                    control={form.control}
+                                    control={control}
                                     name="get"
                                     render={({field}) => (
                                         <FormItem>
                                             <FormControl>
                                                 <Input
                                                     id="get"
-                                                    type="number"
+                                                    type="text"
                                                     placeholder="0"
                                                     {...field}
                                                 />
                                             </FormControl>
+                                            <FormMessage/>
                                         </FormItem>
                                     )}
                                 />
@@ -493,8 +492,8 @@ const Page = ({ params }: { params: { manageId: string } }) => {
                     </Button>
                     <Button size="sm" type="submit">Save Product</Button>
                 </div>
-                </form>
-           </Form>
+            </form>
+            </FormProvider>
         </div>
     );
 };

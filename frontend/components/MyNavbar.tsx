@@ -60,7 +60,7 @@ const Navbar = () => {
                 dispatch(signInAuth(userInfo));
             }
         }catch (err){
-            console.log('Now user', err);
+            console.log('No user', err);
         }
     }
 
