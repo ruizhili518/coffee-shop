@@ -1,7 +1,6 @@
 "use client";
 import Image from "next/image"
 import {
-    File,
     ListFilter,
     MoreHorizontal,
     PlusCircle,
@@ -40,9 +39,47 @@ import {
     TabsTrigger,
 } from "@/components/ui/tabs"
 import {useRouter} from "next/navigation";
+import {getAllProducts} from "@/api/api";
+import {useEffect, useState} from "react";
+import Loading from "@/components/ui/Loading";
+import { CldImage } from "next-cloudinary";
 
 const ProductPage = () => {
+    type Customization = {
+        cusCategory: string,
+        cusName: string,
+        extraprice: number
+    }
+
     const router = useRouter();
+    const [products, setProducts] = useState([{
+        name:"",
+        status:"",
+        baseprice:0,
+        description:"",
+        category:"",
+        image:"",
+        buy:0,
+        getFree:0,
+        customizations:[{cusCategory: "", cusName: "", extraprice: 0}],
+        _id:"",
+        updatedAt: ""
+    }]);
+    const [loading , setLoading] = useState(true);
+
+    const getProducts = async () => {
+        try{
+            const res = await getAllProducts();
+            setProducts(res.data.products);
+            setLoading(false);
+        }catch (err){
+            console.log('Error in getting products.')
+        }
+    }
+
+    useEffect(() => {
+        getProducts();
+    },[])
 
     return (
         <div className="flex min-h-screen flex-col items-center">
@@ -76,7 +113,7 @@ const ProductPage = () => {
                                         </DropdownMenuCheckboxItem>
                                     </DropdownMenuContent>
                                 </DropdownMenu>
-                                <Button size="sm" className="h-8 gap-1">
+                                <Button size="sm" className="h-8 gap-1" onClick={() => {router.push("/product/new_product")}}>
                                     <PlusCircle className="h-3.5 w-3.5"/>
                                     <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
                     Add Product
@@ -89,7 +126,132 @@ const ProductPage = () => {
                                 <CardHeader>
                                     <CardTitle>Products</CardTitle>
                                     <CardDescription>
-                                        Manage Products.
+                                        Manage your products.
+                                    </CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                    <Table>
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead className="hidden w-[100px] sm:table-cell">
+                                                    <span className="sr-only">Image</span>
+                                                </TableHead>
+                                                <TableHead>Name</TableHead>
+                                                <TableHead>Status</TableHead>
+                                                <TableHead className="hidden md:table-cell">
+                                                    Base Price
+                                                </TableHead>
+                                                <TableHead className="hidden md:table-cell">
+                                                    Category
+                                                </TableHead>
+                                                <TableHead className="hidden md:table-cell">
+                                                    Customizations
+                                                </TableHead>
+                                                <TableHead className="hidden md:table-cell">
+                                                    Promotion
+                                                </TableHead>
+                                                <TableHead>
+                                                    <span className="sr-only">Actions</span>
+                                                </TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            { !loading ? products.map(product => {
+                                                    // @ts-ignore
+                                                    const uniqueCusCategories: string[] = Array.from(
+                                                        new Set<string>(product.customizations.map((customization: Customization) => customization.cusCategory)),
+                                                    );
+                                                return(
+                                                    <TableRow key={product.name}>
+                                                        <TableCell className="hidden sm:table-cell">
+                                                            <CldImage
+                                                                alt="Product image"
+                                                                className="aspect-square rounded-md object-contain"
+                                                                height="64"
+                                                                src={product.image}
+                                                                width="64"
+                                                            />
+                                                        </TableCell>
+                                                        <TableCell className="font-medium">
+                                                            {product.name}
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            {
+                                                                product.status === "Active" ?
+                                                                <Badge variant="outline">{product.status}</Badge> :
+                                                                <Badge variant="secondary">{product.status}</Badge>
+                                                            }
+                                                        </TableCell>
+                                                        <TableCell className="hidden md:table-cell">
+                                                            ${product.baseprice}
+                                                        </TableCell>
+                                                        <TableCell className="hidden md:table-cell">
+                                                            {product.category}
+                                                        </TableCell>
+                                                        <TableCell className="hidden md:table-cell">
+                                                            {
+                                                                uniqueCusCategories[0] !== "" ?
+                                                                uniqueCusCategories.map((category, index) => (
+                                                                    <Badge variant="outline" className="mx-1" key={index}>{category}</Badge>
+                                                                    )
+                                                                ) :
+                                                                    <Badge variant="secondary" className="mx-1">None</Badge>
+                                                            }
+                                                        </TableCell>
+                                                        <TableCell className="hidden md:table-cell">
+                                                            {
+                                                                product.buy !== 0 && product.getFree !== 0 ?
+                                                                    `Buy ${product.buy} get ${product.getFree} free.` :
+                                                                    "No Promotion."
+                                                            }
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <DropdownMenu>
+                                                                <DropdownMenuTrigger asChild>
+                                                                    <Button
+                                                                        aria-haspopup="true"
+                                                                        size="icon"
+                                                                        variant="ghost"
+                                                                    >
+                                                                        <MoreHorizontal className="h-4 w-4"/>
+                                                                        <span className="sr-only">Toggle menu</span>
+                                                                    </Button>
+                                                                </DropdownMenuTrigger>
+                                                                <DropdownMenuContent align="end">
+                                                                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                                                    <DropdownMenuItem onClick={() => {
+                                                                        router.push("/product/lemonade")
+                                                                    }}>Edit</DropdownMenuItem>
+                                                                    <DropdownMenuItem>Delete</DropdownMenuItem>
+                                                                </DropdownMenuContent>
+                                                            </DropdownMenu>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                )
+                                            }) :
+                                                <TableRow>
+                                                    <TableCell colSpan={8} className="w-full">
+                                                        <Loading/>
+                                                    </TableCell>
+                                                </TableRow>
+                                            }
+                                        </TableBody>
+                                    </Table>
+                                </CardContent>
+                                <CardFooter>
+                                    <div className="text-xs text-muted-foreground">
+                                        Showing <strong>{products.length > 10 ? '1-10' : `1-${products.length}`}</strong> of <strong>{products.length}</strong>{" "}
+                                        products
+                                    </div>
+                                </CardFooter>
+                            </Card>
+                        </TabsContent>
+                        <TabsContent value="active">
+                            <Card x-chunk="dashboard-06-chunk-0">
+                                <CardHeader>
+                                    <CardTitle>Products</CardTitle>
+                                    <CardDescription>
+                                        Manage your products.
                                     </CardDescription>
                                 </CardHeader>
                                 <CardContent>

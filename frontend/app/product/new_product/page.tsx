@@ -41,16 +41,26 @@ import {
     FormMessage,
 } from "@/components/ui/form"
 import { zodResolver } from "@hookform/resolvers/zod";
-import {useRef, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
+import { AlertCircle } from "lucide-react";
+import {
+    Alert,
+    AlertDescription,
+    AlertTitle,
+} from "@/components/ui/alert";
+import {createProduct} from "@/api/api";
+import MyAlert from "@/components/ui/MyAlert";
+import {useRouter} from "next/navigation";
 
 const Page = ({ params }: { params: { manageId: string } }) => {
+    const router = useRouter();
     // Form design.
     const customizationSchema = z.object({
-        cusCategory: z.string(),
-        cusName: z.string(),
-        extraprice: z.string(),
+        cusCategory: z.string().optional(),
+        cusName: z.string().optional(),
+        extraprice: z.string().optional(),
     });
-
+      //1.Form schema
     const formSchema = z.object({
         name: z.string().min(1, {
             message: "Product name is required.",
@@ -61,9 +71,9 @@ const Page = ({ params }: { params: { manageId: string } }) => {
         baseprice: z.string().min(1,{
             message: "Product base price is required.",
         }),
-        customizations: z.array(customizationSchema),
+        customizations: z.array(customizationSchema).optional(),
         buy: z.string(),
-        get: z.string(),
+        getFree: z.string(),
         status: z.string().min(1, {
             message: "Product status is required."
         }),
@@ -71,13 +81,19 @@ const Page = ({ params }: { params: { manageId: string } }) => {
             message: "Product category is required.",
         }),
     });
-
+      // 2.Make form field and values.
     type FormValues = z.infer<typeof formSchema>;
 
     const methods = useForm<FormValues>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            customizations: [{}] // Start with one empty customer pricing group
+            customizations: [{
+                cusCategory: "",
+                cusName: "",
+                extraprice: ""
+            }],
+            buy: "0",
+            getFree: "0"// Start with one empty customer pricing group
         }
     });
 
@@ -87,17 +103,52 @@ const Page = ({ params }: { params: { manageId: string } }) => {
         control,
         name: "customizations"
     });
-
-    const onSubmit = (values: FormValues) => {
-        console.log(values);
+      // 3. Submit handler.
+    const onSubmit = async (values: FormValues) => {
+        if(selectedFile) {
+            setImgErr("hidden");
+            const formData = new FormData();
+            for(let key in values){
+                if( key !== "customizations"){
+                    // @ts-ignore
+                    formData.append(key, values[key]);
+                }else{
+                    formData.append(key, JSON.stringify(values[key]))
+                }
+            }
+            formData.append("image", selectedFile);
+            try {
+                const res = await createProduct(formData);
+                if(res.status === 200){
+                    setAlertTitle("Create product successfully")
+                    setAlertDesc("You will soon be redirected to the products page.")
+                    setShowAlert(true);
+                    setTimeout(() => { router.push("/product") } , 2500);
+                }
+            }catch (err: any){
+                setAlertTitle("Failed to create product")
+                if(err.response.data.error.includes("duplicate")){
+                    setAlertDesc("The product name is duplicated. Please try a different product name.");
+                    setShowAlert(true)
+                }else{
+                    setAlertDesc("Something wrong with the server. Please try again later.");
+                    setShowAlert(true)
+                }
+            }
+        }else{
+            setImgErr("block")
+        }
     }
 
     // Image state (both file and previewURL)
     const [selectedFile, setSelectedFile] = useState(null);
-    const [previewURL, setPreviewURL] = useState(null);
+    const [previewURL, setPreviewURL] = useState("");
+    const [ imgErr , setImgErr ] = useState("hidden");
 
     // Handle image upload
+    // @ts-ignore
     const handleImageUpload = (e) => {
+        setImgErr("hidden");
         const file = e.target.files[0]; // Get the uploaded file
         if (file) {
             // Set the selected file to state
@@ -109,20 +160,34 @@ const Page = ({ params }: { params: { manageId: string } }) => {
         }
     };
 
-    // Ref to the hidden file input
+    // Ref to the hidden file input.
     const fileInputRef = useRef(null);
-
     const triggerFileInput = () => {
+        // @ts-ignore
         fileInputRef.current.click(); // Open file dialog
     };
+
+    // Alert Dialog Trigger
+    const [showAlert, setShowAlert] = useState(false);
+    const [alertTitle, setAlertTitle] = useState("");
+    const [alertDesc, setAlertDesc] = useState("");
+    // To make the alert disappear automatically in 2 seconds once it shows.
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setShowAlert(false)
+        }, 2000) // 2 seconds
+
+        return () => clearTimeout(timer)
+    }, [showAlert])
 
     return (
 
         <div className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+            <MyAlert isVisible={showAlert} title={alertTitle} desc={alertDesc}/>
             <FormProvider {...methods}>
             <form onSubmit={handleSubmit(onSubmit)} className="mx-auto grid max-w-[59rem] flex-1 auto-rows-max gap-4">
                 <div className="flex items-center gap-4">
-                    <Button variant="outline" size="icon" className="h-7 w-7">
+                    <Button type="button" variant="outline" size="icon" className="h-7 w-7">
                         <ChevronLeft className="h-4 w-4"/>
                         <span className="sr-only">Back</span>
                     </Button>
@@ -130,7 +195,7 @@ const Page = ({ params }: { params: { manageId: string } }) => {
                         Add New Product
                     </h1>
                     <div className="hidden items-center gap-2 md:ml-auto md:flex">
-                        <Button variant="outline" size="sm">
+                        <Button type="button" variant="outline" size="sm">
                             Discard
                         </Button>
                         <Button size="sm" type="submit">Save Product</Button>
@@ -317,7 +382,7 @@ const Page = ({ params }: { params: { manageId: string } }) => {
                                 </Table>
                             </CardContent>
                             <CardFooter className="justify-center border-t p-4">
-                                <Button size="sm" variant="ghost" className="gap-1" onClick={() => append({cusCategory: "",cusName: "",extraprice: ""})}>
+                                <Button type="button" size="sm" variant="ghost" className="gap-1" onClick={() => append({cusCategory: "",cusName: "",extraprice: ""})}>
                                     <PlusCircle className="h-3.5 w-3.5"/>
                                     Add Variant
                                 </Button>
@@ -346,11 +411,11 @@ const Page = ({ params }: { params: { manageId: string } }) => {
                                                         </SelectTrigger>
                                                     </FormControl>
                                                         <SelectContent>
-                                                            <SelectItem value="drinks">Drinks</SelectItem>
-                                                            <SelectItem value="food">
+                                                            <SelectItem value="Drinks">Drinks</SelectItem>
+                                                            <SelectItem value="Food">
                                                                 Food
                                                             </SelectItem>
-                                                            <SelectItem value="merchandise">
+                                                            <SelectItem value="Merchandise">
                                                                 Merchandise
                                                             </SelectItem>
                                                         </SelectContent>
@@ -386,9 +451,8 @@ const Page = ({ params }: { params: { manageId: string } }) => {
                                                             </SelectTrigger>
                                                         </FormControl>
                                                         <SelectContent>
-                                                            <SelectItem value="draft">Draft</SelectItem>
-                                                            <SelectItem value="inactive">Inactive</SelectItem>
-                                                            <SelectItem value="active">Active</SelectItem>
+                                                            <SelectItem value="Inactive">Inactive</SelectItem>
+                                                            <SelectItem value="Active">Active</SelectItem>
                                                         </SelectContent>
                                                     </Select>
                                                     <FormMessage/>
@@ -424,12 +488,20 @@ const Page = ({ params }: { params: { manageId: string } }) => {
                                             ref={fileInputRef}
                                         />
                                         <button
+                                            type="button"
                                             className="flex aspect-square w-full items-center justify-center rounded-md border border-dashed" onClick={triggerFileInput}>
                                             <Upload className="h-4 w-4 text-muted-foreground"/>
                                             <span className="sr-only">Upload</span>
                                         </button>
                                     </div>
                                 </div>
+                                <Alert variant="destructive" className={`mt-4 ${imgErr}`}>
+                                    <AlertCircle className="h-4 w-4" />
+                                    <AlertTitle>Error</AlertTitle>
+                                    <AlertDescription>
+                                        Please upload an image.
+                                    </AlertDescription>
+                                </Alert>
                             </CardContent>
                         </Card>
                         <Card>
@@ -461,17 +533,17 @@ const Page = ({ params }: { params: { manageId: string } }) => {
                                     )}
                                 />
                                 <CardDescription>get</CardDescription>
-                                <Label htmlFor={"get"} className="sr-only">
+                                <Label htmlFor={"getFree"} className="sr-only">
                                     get
                                 </Label>
                                 <FormField
                                     control={control}
-                                    name="get"
+                                    name="getFree"
                                     render={({field}) => (
                                         <FormItem>
                                             <FormControl>
                                                 <Input
-                                                    id="get"
+                                                    id="getFree"
                                                     type="text"
                                                     placeholder="0"
                                                     {...field}

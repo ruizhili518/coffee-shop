@@ -30,3 +30,17 @@ export const getProfile = () => {
     })
 }
 
+export const createProduct = (value) => {
+    return http.request({
+        url: '/product/create',
+        method: 'POST',
+        data: value
+    })
+}
+
+export const getAllProducts = () => {
+    return http.request({
+        url: '/product/',
+        method: 'GET'
+    })
+}

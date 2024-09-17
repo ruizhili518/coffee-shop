@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import customizationSchema from "./customization.model.js";
 
 const productSchema = new mongoose.Schema({
     category: {
@@ -22,16 +23,16 @@ const productSchema = new mongoose.Schema({
         type: Number,
         required: [true, "Price is required"]
     },
-    customizations: [
-        { customization: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Customization'}
-        }
-    ],
-    getFree: {
-        type: Array,
+    customizations: [customizationSchema],
+    buy: {
+        type: Number,
         required: true,
-        default: [0,0] // Buy x get y free.
+        default: 0 // Buy x
+    } ,
+    getFree: {
+        type: Number,
+        required: true,
+        default: 0 // and get y free.
     } ,
     status: { // Shown for customers.
         type: String,

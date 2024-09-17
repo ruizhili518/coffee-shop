@@ -12,6 +12,4 @@ const customizationSchema = new mongoose.Schema({
     }
 })
 
-const Customization = mongoose.model('Customization', customizationSchema);
-
-export default Customization;
+export default customizationSchema;

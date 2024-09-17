@@ -1,14 +1,14 @@
 import express from 'express';
 import {createProduct, deleteProduct, getAllProducts} from "../controllers/product.controllers.js";
-import { superadminRoute } from "../middleware/auth.middleware.js";
+import { uploadImg } from "../middleware/uploadImage.js";
 
 const router = express.Router();
 
 router.get('/', getAllProducts);
-router.post('/create', superadminRoute, createProduct);
-router.delete('/:id', superadminRoute, deleteProduct)
+router.post('/create',uploadImg.single('image'),createProduct);
+router.delete('/:id', deleteProduct)
 
 //TODO
-//router.post('/:id',protectRoute,superadminRoute, updateProduct)
+//router.post('/:id',updateProduct)
 
 export default router;
