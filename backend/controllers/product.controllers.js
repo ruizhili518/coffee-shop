@@ -10,7 +10,7 @@ export const getAllProducts = async (req, res) =>{
         console.log("Error in getAllProducts.", err.message);
         res.status(500).json({message: 'Server error', error: err.message});
     }
-}
+};
 
 export const createProduct = async (req, res) =>{
     try{
@@ -47,7 +47,7 @@ export const createProduct = async (req, res) =>{
         console.log("Error in createProduct.", err.message);
         res.status(500).json({message: 'Server error', error: err.message});
     }
-}
+};
 
 export const deleteProduct = async (req, res)=>{
     try{
@@ -57,8 +57,8 @@ export const deleteProduct = async (req, res)=>{
             return res.status(403).json({message: 'Product not found.'});
         }
 
-        if(product.image){
-            const publicId = product.image.split(".").pop().split(".")[0] // Get id of the image in cloudinary
+        if(delProduct.image){
+            const publicId = delProduct.image.split(".").pop().split(".")[0] // Get id of the image in cloudinary
             try{
                 await cloudinary.uploader.destroy(`products/${publicId}`);
                 console.log("Image deleted from cloudinary.")
@@ -66,7 +66,6 @@ export const deleteProduct = async (req, res)=>{
                 console.log("Error in delete image.", err.message);
             }
         }
-
         await Product.findByIdAndDelete(req.params.id);
 
         res.json({message:"Product deleted successfully."});
@@ -74,8 +73,17 @@ export const deleteProduct = async (req, res)=>{
         console.log("Error in deleteProduct.", err.message);
         res.status(500).json({message: 'Server error', error: err.message});
     }
-}
+};
 
+export const getProductById = async (req, res) => {
+    try {
+        const productData = await Product.find(req.params.id);
+        res.status(200).json({productData,message:"Get product successfully."})
+    }catch (err){
+        console.log("Error in getProductById.", err.message);
+        res.status(500).json({message: 'Server error', error: err.message});
+    }
+}
 //TODO : update product
 // export const updateProduct = async (req, res)=>{
 //     try{

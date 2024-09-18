@@ -37,7 +37,7 @@ const productSchema = new mongoose.Schema({
     status: { // Shown for customers.
         type: String,
         required: true,
-        default: "draft"
+        default: "Inactive"
     }
 },{
     timestamps: true
