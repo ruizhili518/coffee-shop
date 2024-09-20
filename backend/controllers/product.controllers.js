@@ -77,18 +77,50 @@ export const deleteProduct = async (req, res)=>{
 
 export const getProductById = async (req, res) => {
     try {
-        const productData = await Product.find(req.params.id);
+        const productData = await Product.findById(req.params.id);
         res.status(200).json({productData,message:"Get product successfully."})
     }catch (err){
         console.log("Error in getProductById.", err.message);
         res.status(500).json({message: 'Server error', error: err.message});
     }
 }
-//TODO : update product
-// export const updateProduct = async (req, res)=>{
-//     try{
-//
-//     }catch (err) {
-//
-//     }
-// }
+
+export const updateProductById = async (req, res)=>{
+    try{
+        const productId = req.params.id;
+        let { name, description, baseprice, customizations, buy, getFree , status, category, image } = req.body;
+        baseprice = Number(baseprice);
+        buy = parseInt(buy);
+        getFree = parseInt(getFree);
+        customizations = JSON.parse(customizations).map(cus => ({
+            cusCategory: cus.cusCategory,
+            cusName: cus.cusName,
+            extraprice: Number(cus.extraprice)
+        }));
+
+        let cloudinaryRes = null;
+        if(req.file){
+            const file = dataUri(req).content;
+            cloudinaryRes = await cloudinary.uploader.upload(file,{folder:"products"});
+            image = cloudinaryRes.secure_url;
+        }
+
+        const newProduct = {
+            name, description, baseprice, customizations, buy, getFree , status, category, image
+        }
+
+        const response = await Product.findByIdAndUpdate(productId,newProduct,{
+            new: true,
+            runValidators: true
+        })
+
+        if(!response){
+            return res.status(404).json({message:'Product Not Found.'})
+        }
+
+        return res.status(200).json({response, message: 'Update product successfully.'})
+    }catch (err) {
+        console.error('Error updating product:', err);
+        res.status(400).json({ message: err.message });
+    }
+}

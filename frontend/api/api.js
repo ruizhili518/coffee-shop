@@ -58,3 +58,11 @@ export const getProductById = (id) => {
         method: 'POST'
     })
 }
+
+export const updateProductById = (id, value) => {
+    return http.request({
+        url: `/product/update/${id}`,
+        method: 'POST',
+        data: value
+    })
+}

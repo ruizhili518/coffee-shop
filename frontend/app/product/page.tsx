@@ -1,6 +1,5 @@
 "use client";
 import {
-    ListFilter,
     MoreHorizontal,
     PlusCircle,
 } from "lucide-react"
@@ -16,11 +15,9 @@ import {
 } from "@/components/ui/card"
 import {
     DropdownMenu,
-    DropdownMenuCheckboxItem,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuLabel,
-    DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import {
@@ -142,7 +139,6 @@ const ProductPage = () => {
     const deleteHandler = async (id: string) => {
         try {
             const res = await deleteProductById(id);
-            console.log(res);
             getProducts();
         }catch (err){
             console.log(err);

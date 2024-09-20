@@ -52,7 +52,7 @@ import {createProduct} from "@/api/api";
 import MyAlert from "@/components/ui/MyAlert";
 import {useRouter} from "next/navigation";
 
-const Page = ({ params }: { params: { manageId: string } }) => {
+const Page = () => {
     const router = useRouter();
     // Form design.
     const customizationSchema = z.object({
