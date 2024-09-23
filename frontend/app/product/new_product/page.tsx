@@ -187,7 +187,7 @@ const Page = () => {
             <FormProvider {...methods}>
             <form onSubmit={handleSubmit(onSubmit)} className="mx-auto grid max-w-[59rem] flex-1 auto-rows-max gap-4">
                 <div className="flex items-center gap-4">
-                    <Button type="button" variant="outline" size="icon" className="h-7 w-7">
+                    <Button type="button" variant="outline" size="icon" className="h-7 w-7" onClick={() => {router.push('/product')}}>
                         <ChevronLeft className="h-4 w-4"/>
                         <span className="sr-only">Back</span>
                     </Button>
@@ -195,7 +195,7 @@ const Page = () => {
                         Add New Product
                     </h1>
                     <div className="hidden items-center gap-2 md:ml-auto md:flex">
-                        <Button type="button" variant="outline" size="sm">
+                        <Button type="button" variant="outline" size="sm" onClick={() => {router.push('/product')}}>
                             Discard
                         </Button>
                         <Button size="sm" type="submit">Save Product</Button>
@@ -559,7 +559,7 @@ const Page = () => {
                     </div>
                 </div>
                 <div className="flex items-center justify-center gap-2 md:hidden">
-                    <Button variant="outline" size="sm">
+                    <Button type="button" variant="outline" size="sm" onClick={() => {router.push('/product')}}>
                         Discard
                     </Button>
                     <Button size="sm" type="submit">Save Product</Button>

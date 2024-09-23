@@ -602,7 +602,7 @@ const Page = ({ params }: { params: { manageById: string } }) => {
                             </div>
                         </div>
                         <div className="flex items-center justify-center gap-2 md:hidden">
-                            <Button variant="outline" size="sm">
+                            <Button type="button" variant="outline" size="sm" onClick={() => {router.push('/product')}}>
                                 Discard
                             </Button>
                             <Button size="sm" type="submit">Save Product</Button>

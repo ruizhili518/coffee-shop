@@ -5,26 +5,50 @@ const people = [
         id: 'person-1',
         name: 'Neeko',
         role: 'Co-Founder',
-        avatar: 'https://www.shadcnblocks.com/images/block/avatar-7.webp',
+        avatar: 'https://res.cloudinary.com/dbdrbjmnr/image/upload/v1726946499/neeko_uanzsz.png',
     },
     {
         id: 'person-2',
-        name: 'Icey',
+        name: 'Eunnice',
         role: 'Co-Founder',
-        avatar: 'https://www.shadcnblocks.com/images/block/avatar-3.webp',
+        avatar: 'https://res.cloudinary.com/dbdrbjmnr/image/upload/v1726946498/eunnice_svspm4.png',
     },
     {
         id: 'person-3',
         name: 'Didi',
         role: 'Financial Expert',
-        avatar: 'https://www.shadcnblocks.com/images/block/avatar-5.webp',
+        avatar: 'https://res.cloudinary.com/dbdrbjmnr/image/upload/v1726946497/didi_vytggd.png',
     },
     {
         id: 'person-4',
         name: 'Edward',
         role: 'IT Support',
-        avatar: 'https://www.shadcnblocks.com/images/block/avatar-2.webp',
-    }
+        avatar: 'https://res.cloudinary.com/dbdrbjmnr/image/upload/v1726946497/edward_peb9tn.png',
+    },
+    {
+        id: 'person-5',
+        name: '',
+        role: '',
+        avatar: '',
+    },
+    {
+        id: 'person-6',
+        name: 'Eathon',
+        role: 'Future-owner',
+        avatar: 'https://res.cloudinary.com/dbdrbjmnr/image/upload/v1726946497/eathon_xoqt2d.png',
+    },
+    {
+        id: 'person-7',
+        name: 'Pudding',
+        role: 'Mascot',
+        avatar: 'https://res.cloudinary.com/dbdrbjmnr/image/upload/v1726946439/pudding_eenzhj.png',
+    },
+    {
+        id: 'person-8',
+        name: '',
+        role: '',
+        avatar: '',
+    },
 ];
 
 const Team = () => {
@@ -41,7 +65,7 @@ const Team = () => {
             <div className="container mt-16 grid gap-x-8 gap-y-16 md:grid-cols-2 lg:grid-cols-4 mx-auto">
                 {people.map((person) => (
                     <div key={person.id} className="flex flex-col items-center">
-                        <Avatar className="mb-4 size-20 border md:mb-5 lg:size-24">
+                        <Avatar className={`mb-4 size-20 border md:mb-5 lg:size-24 ${person.name === "" ? "hidden" : ""}`}>
                             <AvatarImage src={person.avatar} />
                             <AvatarFallback>{person.name}</AvatarFallback>
                         </Avatar>
