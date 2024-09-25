@@ -18,6 +18,9 @@ import {
     SheetTrigger,
 } from "@/components/ui/sheet";
 import {Separator} from "@/components/ui/separator";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import {Label} from "@/components/ui/label";
+import {ScrollArea} from "@/components/ui/scroll-area";
 
 const MenuPage = () => {
     type Customization = {
@@ -74,6 +77,7 @@ const MenuPage = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
     const [filteredProducts, setFilteredProducts] = useState(products);
+    const [productPrice, setProductPrice] = useState(0);
 
     useEffect(() => {
         let result = products
@@ -105,6 +109,11 @@ const MenuPage = () => {
 
         setFilteredProducts(result)
     }, [products,searchTerm, selectedCategories, sortBy, showBy]);
+
+    const [selectedSize, setSelectedSize] = useState("Regular");
+    const [selectedIce, setSelectedIce] = useState("Normal Ice");
+    const [selectedMilk, setSelectedMilk] = useState("Normal Milk");
+    const [quantity, setQuantity] = useState(1);
 
     return (
         <div className="container mx-auto p-4 lg:w-3/4">
@@ -192,6 +201,9 @@ const MenuPage = () => {
                             const uniqueCusCategories: string[] = Array.from(
                                 new Set<string>(product.customizations.map((customization: Customization) => customization.cusCategory)),
                             );
+                            const sizeCus = product.customizations.filter(cus => cus.cusCategory === "Size");
+                            const iceCus = product.customizations.filter(cus => cus.cusCategory === "Ice");
+                            const milkCus = product.customizations.filter(cus => cus.cusCategory === "Milk");
                             return (<Card key={product._id} className="max-h-fit">
                                 <CardContent className="p-4">
                                     <Image src={product.image} alt={product.name} width="120" height="120"
@@ -232,43 +244,137 @@ const MenuPage = () => {
                                             </Button>
                                         </SheetTrigger>
                                         <SheetContent>
-                                            <SheetHeader className="my-4 flex-col">
-                                                <Image src={product.image} alt={product.name} width={300} height={300} className="self-center"/>
-                                                <SheetTitle>{product.name}</SheetTitle>
-                                                <SheetDescription>
-                                                    {product.description}
-                                                </SheetDescription>
-                                                <SheetTitle>
-                                                    ${product.baseprice}
-                                                </SheetTitle>
-                                            </SheetHeader>
-                                            <Separator/>
-                                            <SheetHeader className="mt-4 flex-col">
-                                                <SheetTitle>
-                                                    Customization:
-                                                </SheetTitle>
-                                                {
-                                                    uniqueCusCategories[0] !== "" &&
-                                                    uniqueCusCategories.map((category, index) => (
-                                                        <SheetDescription className="flex">
-                                                            <div className="hidden lg:block">
-                                                                {category}
-                                                            </div>
-                                                            <Image src={`/${category}.png`} alt="icon" height="20" width="20"/>
-                                                        </SheetDescription>
-                                                    ))
-                                                }
-                                            </SheetHeader>
-                                            <SheetFooter>
-                                                <Button className="w-full" variant="outline">
-                                                    Add to Cart
-                                                </Button>
-                                            </SheetFooter>
+                                            <ScrollArea className="h-[calc(100vh-3rem)]">
+                                                <SheetHeader className="my-4 flex-col">
+                                                    <Image src={product.image} alt={product.name} width={300}
+                                                           height={300} className="self-center"/>
+                                                    <SheetTitle>{product.name}</SheetTitle>
+                                                    <SheetDescription>
+                                                        {product.description}
+                                                    </SheetDescription>
+                                                </SheetHeader>
+                                                <Separator/>
+                                                <SheetHeader className="mt-4 flex-col">
+                                                    <SheetTitle>
+                                                        {uniqueCusCategories[0] !== "" && "Customization:"}
+                                                    </SheetTitle>
+
+                                                    {
+                                                        uniqueCusCategories[0] !== "" &&
+                                                        uniqueCusCategories.map((category, index) => (
+                                                            <SheetDescription className="flex-col">
+                                                                <Badge className="flex w-16 justify-center mb-4"
+                                                                       variant="outline">
+                                                                    {category}
+                                                                    <Image src={`/${category}.png`} alt="icon"
+                                                                           height="20" width="20"/>
+                                                                </Badge>
+                                                                {category === "Size" && sizeCus.length !== 0 &&
+                                                                    <RadioGroup value={selectedSize}
+                                                                                onValueChange={setSelectedSize}
+                                                                                defaultValue={sizeCus[0].cusName}
+                                                                    >
+                                                                        <div
+                                                                            className="grid grid-col-1 md:grid-cols-2 gap-2 mb-2">
+                                                                            {sizeCus.map(customization => {
+                                                                                return (
+                                                                                    <div
+                                                                                        className="flex items-center space-x-2">
+                                                                                        <RadioGroupItem
+                                                                                            value={customization.cusName}
+                                                                                            id={customization.cusName}/>
+                                                                                        <Label
+                                                                                            htmlFor={customization.cusName}>
+                                                                                            {customization.cusName} &nbsp;
+                                                                                            ${customization.extraprice}
+                                                                                        </Label>
+                                                                                    </div>
+                                                                                )
+                                                                            })}
+                                                                        </div>
+                                                                    </RadioGroup>
+                                                                }
+                                                                {category === "Ice" &&
+                                                                    <RadioGroup value={selectedIce}
+                                                                                onValueChange={setSelectedIce}
+                                                                                defaultValue={iceCus[0].cusName}
+                                                                    >
+                                                                        <div
+                                                                            className="grid grid-col-1 md:grid-cols-2 gap-2 mb-2">
+                                                                            {iceCus.map(customization => {
+                                                                                return (
+                                                                                    <div
+                                                                                        className="flex items-center space-x-2">
+                                                                                        <RadioGroupItem
+                                                                                            value={customization.cusName}
+                                                                                            id={customization.cusName}/>
+                                                                                        <Label
+                                                                                            htmlFor={customization.cusName}>
+                                                                                            {customization.cusName} &nbsp;
+                                                                                            ${customization.extraprice}
+                                                                                        </Label>
+                                                                                    </div>
+                                                                                )
+                                                                            })}
+                                                                        </div>
+                                                                    </RadioGroup>
+                                                                }
+                                                                {category === "Milk" && milkCus.length !== 0 &&
+                                                                    <RadioGroup value={selectedMilk}
+                                                                                onValueChange={setSelectedMilk}
+                                                                                defaultValue={milkCus[0].cusName}
+                                                                    >
+                                                                        <div
+                                                                            className="grid grid-col-1 md:grid-cols-2 gap-2 mb-2">
+                                                                            {milkCus.map(customization => {
+                                                                                return (
+                                                                                    <div
+                                                                                        className="flex items-center space-x-2">
+                                                                                        <RadioGroupItem
+                                                                                            value={customization.cusName}
+                                                                                            id={customization.cusName}/>
+                                                                                        <Label
+                                                                                            htmlFor={customization.cusName}>
+                                                                                            {customization.cusName} &nbsp;
+                                                                                            ${customization.extraprice}
+                                                                                        </Label>
+                                                                                    </div>
+                                                                                )
+                                                                            })}
+                                                                        </div>
+                                                                    </RadioGroup>
+                                                                }
+                                                            </SheetDescription>
+                                                        ))}
+                                                </SheetHeader>
+                                                <div className="flex items-center justify-between w-3/4 mt-4">
+                                                    <div className="flex items-center space-x-4">
+                                                        <Button variant="outline" size="icon" className="rounded-full text-xl"
+                                                                onClick={() => setQuantity(Math.max(1, quantity - 1))}>
+                                                            -
+                                                        </Button>
+                                                        <span>{quantity}</span>
+                                                        <Button variant="outline" size="icon" className="rounded-full text-xl"
+                                                                onClick={() => setQuantity(quantity + 1)}>
+                                                            +
+                                                        </Button>
+                                                    </div>
+                                                    <div className="text-2xl font-bold">
+                                                        ${(((product?.baseprice || 0) + (sizeCus.length !== 0 ? sizeCus.filter(cus => cus.cusName === selectedSize)[0].extraprice : 0) + (iceCus.length !== 0 ? iceCus.filter(cus => cus.cusName === selectedIce)[0].extraprice : 0) + (milkCus.length !== 0 ? milkCus.filter(cus => cus.cusName === selectedMilk)[0].extraprice : 0) )* quantity).toFixed(2)}
+                                                    </div>
+                                                </div>
+                                                <SheetFooter>
+                                                    <Button className="w-full mt-4" variant="outline">
+                                                        Add to Cart
+                                                    </Button>
+                                                </SheetFooter>
+                                            </ScrollArea>
                                         </SheetContent>
                                     </Sheet>
                                 </CardFooter>
-                            </Card>
-                        )}) :
+                                </Card>
+                            )
+                        }) :
                         <div className="flex w-full justify-center">
                             <Loading/>
                         </div>
