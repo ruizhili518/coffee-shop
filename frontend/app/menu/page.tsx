@@ -9,13 +9,34 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import Loading from "@/components/ui/Loading";
 import Image from "next/image";
 import {Badge} from "@/components/ui/badge";
-import { GiIceCube } from "react-icons/gi";
+import {
+    Sheet,
+    SheetContent,
+    SheetDescription, SheetFooter,
+    SheetHeader,
+    SheetTitle,
+    SheetTrigger,
+} from "@/components/ui/sheet";
+import {Separator} from "@/components/ui/separator";
 
 const MenuPage = () => {
     type Customization = {
         cusCategory: string,
         cusName: string,
         extraprice: number
+    }
+    type Product = {
+        name:string,
+        status:string,
+        baseprice:number,
+        description:string,
+        category:string,
+        image:string,
+        buy:number,
+        getFree:number,
+        customizations:Customization[],
+        _id:string,
+        updatedAt: string
     }
     // Initialize state to get products data.
     const [products, setProducts] = useState([{
@@ -35,8 +56,9 @@ const MenuPage = () => {
     const getProducts = async () => {
         try{
             const res = await getAllProducts();
+            const activeProduct = res.data.products.filter((product:Product) => product.status === "Active")
             setIsLoading(false);
-            setProducts(res.data.products);
+            setProducts(activeProduct);
         }catch (err){
             console.log('Error in getting products.')
         }
@@ -170,10 +192,10 @@ const MenuPage = () => {
                             const uniqueCusCategories: string[] = Array.from(
                                 new Set<string>(product.customizations.map((customization: Customization) => customization.cusCategory)),
                             );
-                            return (<Card key={product._id} className="h-96">
+                            return (<Card key={product._id} className="max-h-fit">
                                 <CardContent className="p-4">
                                     <Image src={product.image} alt={product.name} width="120" height="120"
-                                           className="aspect-square w-full rounded-md object-contain"/>
+                                           className="aspect-square w-full rounded-md object-contain mb-2"/>
                                     <div className="flex-col">
                                         <div className="flex justify-between items-center">
                                             <div className="text-sm font-semibold">{product.name}</div>
@@ -185,9 +207,13 @@ const MenuPage = () => {
                                             {
                                                 uniqueCusCategories[0] !== "" &&
                                                     uniqueCusCategories.map((category, index) => (
-                                                            <Badge variant="outline" key={index}>{category}</Badge>
-                                                        )
-                                                    )
+                                                        <Badge variant="outline" key={index}>
+                                                            <div className="hidden lg:block">
+                                                                {category}
+                                                            </div>
+                                                            <Image src={`/${category}.png`} alt="icon" height="20" width="20"/>
+                                                        </Badge>
+                                                    ))
                                             }
                                             {
                                                 (product.buy !== 0 && product.getFree !== 0) &&
@@ -199,7 +225,47 @@ const MenuPage = () => {
                                     </div>
                                 </CardContent>
                                 <CardFooter className="p-2">
-                                    <Button className="w-full" variant="outline">Add to Cart</Button>
+                                    <Sheet>
+                                        <SheetTrigger className="w-full">
+                                            <Button className="w-full" variant="outline">
+                                                Add to Cart
+                                            </Button>
+                                        </SheetTrigger>
+                                        <SheetContent>
+                                            <SheetHeader className="my-4 flex-col">
+                                                <Image src={product.image} alt={product.name} width={300} height={300} className="self-center"/>
+                                                <SheetTitle>{product.name}</SheetTitle>
+                                                <SheetDescription>
+                                                    {product.description}
+                                                </SheetDescription>
+                                                <SheetTitle>
+                                                    ${product.baseprice}
+                                                </SheetTitle>
+                                            </SheetHeader>
+                                            <Separator/>
+                                            <SheetHeader className="mt-4 flex-col">
+                                                <SheetTitle>
+                                                    Customization:
+                                                </SheetTitle>
+                                                {
+                                                    uniqueCusCategories[0] !== "" &&
+                                                    uniqueCusCategories.map((category, index) => (
+                                                        <SheetDescription className="flex">
+                                                            <div className="hidden lg:block">
+                                                                {category}
+                                                            </div>
+                                                            <Image src={`/${category}.png`} alt="icon" height="20" width="20"/>
+                                                        </SheetDescription>
+                                                    ))
+                                                }
+                                            </SheetHeader>
+                                            <SheetFooter>
+                                                <Button className="w-full" variant="outline">
+                                                    Add to Cart
+                                                </Button>
+                                            </SheetFooter>
+                                        </SheetContent>
+                                    </Sheet>
                                 </CardFooter>
                             </Card>
                         )}) :

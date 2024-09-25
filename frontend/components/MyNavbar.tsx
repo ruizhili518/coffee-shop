@@ -69,15 +69,15 @@ const Navbar = () => {
 
     //Set menu content and initial state of the menu.
     const userMenu = [
-        [ "/" , "Home"], [ "/", "Menu"]
+        [ "/" , "Home"], [ "/menu", "Menu"]
     ];
 
     const adminMenu = [
-        [ "/" , "Home"], [ "/", "Menu"] , [ "/" , "Order History" ]
+        [ "/" , "Home"], [ "/menu", "Menu"] , [ "/" , "Order History" ]
     ];
 
     const superAdminMenu = [
-        [ "/" , "Home"], [ "/", "Menu"] , [ "/" , "Order History" ], [ "/product" , "Manage Product" ] , [ "/", "Manage Store"]
+        [ "/" , "Home"], [ "/menu", "Menu"] , [ "/" , "Order History" ], [ "/product" , "Manage Product" ] , [ "/", "Manage Store"]
     ];
 
     const [menu, setMenu] = useState(userMenu);

@@ -27,28 +27,16 @@ const people = [
     },
     {
         id: 'person-5',
-        name: '',
-        role: '',
-        avatar: '',
-    },
-    {
-        id: 'person-6',
         name: 'Eathon',
         role: 'Future-owner',
         avatar: 'https://res.cloudinary.com/dbdrbjmnr/image/upload/v1726946497/eathon_xoqt2d.png',
     },
     {
-        id: 'person-7',
+        id: 'person-6',
         name: 'Pudding',
         role: 'Mascot',
         avatar: 'https://res.cloudinary.com/dbdrbjmnr/image/upload/v1726946439/pudding_eenzhj.png',
-    },
-    {
-        id: 'person-8',
-        name: '',
-        role: '',
-        avatar: '',
-    },
+    }
 ];
 
 const Team = () => {
@@ -62,10 +50,10 @@ const Team = () => {
                     Our team is a passionate group of coffee enthusiasts, artists, and dreamers who share a common goal: to bring a little magic into your everyday life.
                 </p>
             </div>
-            <div className="container mt-16 grid gap-x-8 gap-y-16 md:grid-cols-2 lg:grid-cols-4 mx-auto">
+            <div className="container mt-16 grid gap-x-8 gap-y-16 md:grid-cols-2 lg:grid-cols-3 mx-auto">
                 {people.map((person) => (
                     <div key={person.id} className="flex flex-col items-center">
-                        <Avatar className={`mb-4 size-20 border md:mb-5 lg:size-24 ${person.name === "" ? "hidden" : ""}`}>
+                        <Avatar className="mb-4 size-20 border md:mb-5 lg:size-24">
                             <AvatarImage src={person.avatar} />
                             <AvatarFallback>{person.name}</AvatarFallback>
                         </Avatar>
