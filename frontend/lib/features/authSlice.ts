@@ -24,7 +24,7 @@ export type AuthState = {
     role: string
 }; //Type of the value.
 
- export type InitialState = {
+export type InitialState = {
     value: AuthState;
 }; //Type of the state.
 

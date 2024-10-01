@@ -37,6 +37,7 @@ import {AuthState, signInAuth, signOutAuth} from "@/lib/features/authSlice";
 import {getProfile, signOut} from "@/api/api";
 import {useEffect, useState} from "react";
 import {useDispatch} from "react-redux";
+import Cart from "@/components/Cart";
 
 const Navbar = () => {
     const dispatch = useDispatch<AppDispatch>();
@@ -148,7 +149,8 @@ const Navbar = () => {
                             }
                         </div>
                     </div>
-                    <div>
+                    <div className="flex gap-4">
+                        <Cart/>
                         { userInformation.role !== 'ROLE_VISITOR' ?
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -197,7 +199,8 @@ const Navbar = () => {
                                 Eunnikoo
                             </span>
                         </div>
-                        <div className="flex gap-4">
+                        <div className="flex gap-2">
+                            <Cart/>
                         { userInformation.role !== "ROLE_VISITOR" &&
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>

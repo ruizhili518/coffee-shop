@@ -10,7 +10,7 @@ import Loading from "@/components/ui/Loading";
 import Image from "next/image";
 import {Badge} from "@/components/ui/badge";
 import {
-    Sheet,
+    Sheet, SheetClose,
     SheetContent,
     SheetDescription, SheetFooter,
     SheetHeader,
@@ -21,6 +21,9 @@ import {Separator} from "@/components/ui/separator";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import {Label} from "@/components/ui/label";
 import {ScrollArea} from "@/components/ui/scroll-area";
+import {useDispatch} from "react-redux";
+import {AppDispatch, useAppSelector} from "@/lib/store";
+import {addItem, emptyCart, ItemState} from "@/lib/features/cartSlice";
 
 const MenuPage = () => {
     type Customization = {
@@ -114,6 +117,50 @@ const MenuPage = () => {
     const [selectedIce, setSelectedIce] = useState("Normal Ice");
     const [selectedMilk, setSelectedMilk] = useState("Normal Milk");
     const [quantity, setQuantity] = useState(1);
+
+    const initializeHandler = () => {
+        setSelectedSize("Regular");
+        setSelectedIce("Normal Ice");
+        setSelectedMilk("Normal Milk");
+        setQuantity(1);
+    };
+
+    const dispatch = useDispatch<AppDispatch>();
+
+    const getPrice = (product: Product , selectedName: string) => {
+        return product.customizations.length === 0 ? 0 : (product.customizations.filter(cus => cus.cusName === selectedName)[0] ? product.customizations.filter(cus => cus.cusName === selectedName)[0].extraprice : 0);
+    }
+
+    const getDiscount = (product: Product , amount: number) => {
+        if(amount <= product.buy) return amount;
+        const free = Math.floor(amount / (product.buy + product.getFree));
+        return (amount - free);
+    }
+
+    const addCartHandler = (product: Product) => {
+        const sizePrice = getPrice(product, selectedSize);
+        const milkPrice= getPrice(product, selectedMilk);
+        const icePrice = getPrice(product,selectedIce);
+        const time = Date.now();
+        const item: ItemState = {
+            time: time,
+            name: product.name,
+            size: selectedSize,
+            sizePrice: sizePrice,
+            milk: selectedMilk,
+            milkPrice: milkPrice,
+            ice: selectedIce,
+            icePrice: icePrice,
+            amount: quantity,
+            price: product.buy === 0 ? ((product.baseprice + sizePrice + milkPrice + icePrice) * quantity) : ((product.baseprice + sizePrice + milkPrice + icePrice) * getDiscount(product,quantity))
+        }
+        dispatch(addItem(item));
+    }
+
+    let cart = useAppSelector((state) => state.cartReducer.value);
+    useEffect(() => {
+        console.log(cart);
+    }, [cart]);
 
     return (
         <div className="container mx-auto p-4 lg:w-3/4">
@@ -239,7 +286,7 @@ const MenuPage = () => {
                                 <CardFooter className="p-2">
                                     <Sheet>
                                         <SheetTrigger className="w-full">
-                                            <Button className="w-full" variant="outline">
+                                            <Button className="w-full" variant="outline" onClick={initializeHandler}>{/*Initialize the selected cus.*/}
                                                 Add to Cart
                                             </Button>
                                         </SheetTrigger>
@@ -258,7 +305,6 @@ const MenuPage = () => {
                                                     <SheetTitle>
                                                         {uniqueCusCategories[0] !== "" && "Customization:"}
                                                     </SheetTitle>
-
                                                     {
                                                         uniqueCusCategories[0] !== "" &&
                                                         uniqueCusCategories.map((category, index) => (
@@ -270,9 +316,7 @@ const MenuPage = () => {
                                                                            height="20" width="20"/>
                                                                 </Badge>
                                                                 {category === "Size" && sizeCus.length !== 0 &&
-                                                                    <RadioGroup value={selectedSize}
-                                                                                onValueChange={setSelectedSize}
-                                                                                defaultValue={sizeCus[0].cusName}
+                                                                    <RadioGroup value={selectedSize} onValueChange={setSelectedSize} defaultValue={sizeCus[0].cusName}
                                                                     >
                                                                         <div
                                                                             className="grid grid-col-1 md:grid-cols-2 gap-2 mb-2">
@@ -360,13 +404,21 @@ const MenuPage = () => {
                                                         </Button>
                                                     </div>
                                                     <div className="text-2xl font-bold">
-                                                        ${(((product?.baseprice || 0) + (sizeCus.length !== 0 ? sizeCus.filter(cus => cus.cusName === selectedSize)[0].extraprice : 0) + (iceCus.length !== 0 ? iceCus.filter(cus => cus.cusName === selectedIce)[0].extraprice : 0) + (milkCus.length !== 0 ? milkCus.filter(cus => cus.cusName === selectedMilk)[0].extraprice : 0) )* quantity).toFixed(2)}
+                                                        ${product.buy === 0 ?
+                                                            (((product?.baseprice || 0) + (getPrice(product,selectedIce)) + (getPrice(product, selectedSize)) + (getPrice(product, selectedMilk)) )* quantity).toFixed(2) : (
+                                                                ((product?.baseprice || 0) + (getPrice(product,selectedIce)) + (getPrice(product, selectedSize)) + (getPrice(product, selectedMilk))) * getDiscount(product,quantity)
+                                                            ).toFixed(2)
+                                                        }
                                                     </div>
                                                 </div>
                                                 <SheetFooter>
-                                                    <Button className="w-full mt-4" variant="outline">
+                                                    <SheetClose className="w-full">
+                                                    <Button className="w-full mt-4" variant="outline" onClick={() => {
+                                                        addCartHandler(product);
+                                                    }}>
                                                         Add to Cart
                                                     </Button>
+                                                    </SheetClose>
                                                 </SheetFooter>
                                             </ScrollArea>
                                         </SheetContent>
