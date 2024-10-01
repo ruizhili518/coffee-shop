@@ -18,12 +18,12 @@ import {
     SheetTrigger,
 } from "@/components/ui/sheet";
 import {Separator} from "@/components/ui/separator";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import {RadioGroup, RadioGroupItem} from "@/components/ui/radio-group";
 import {Label} from "@/components/ui/label";
 import {ScrollArea} from "@/components/ui/scroll-area";
 import {useDispatch} from "react-redux";
-import {AppDispatch, useAppSelector} from "@/lib/store";
-import {addItem, emptyCart, ItemState} from "@/lib/features/cartSlice";
+import {AppDispatch} from "@/lib/store";
+import {addItem, ItemState} from "@/lib/features/cartSlice";
 
 const MenuPage = () => {
     type Customization = {
@@ -44,6 +44,7 @@ const MenuPage = () => {
         _id:string,
         updatedAt: string
     }
+
     // Initialize state to get products data.
     const [products, setProducts] = useState([{
         name:"",
@@ -81,7 +82,6 @@ const MenuPage = () => {
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
     const [filteredProducts, setFilteredProducts] = useState(products);
     const [productPrice, setProductPrice] = useState(0);
-
     useEffect(() => {
         let result = products
         // Apply search filter
@@ -113,11 +113,11 @@ const MenuPage = () => {
         setFilteredProducts(result)
     }, [products,searchTerm, selectedCategories, sortBy, showBy]);
 
+    //States to get customization details.
     const [selectedSize, setSelectedSize] = useState("Regular");
     const [selectedIce, setSelectedIce] = useState("Normal Ice");
     const [selectedMilk, setSelectedMilk] = useState("Normal Milk");
     const [quantity, setQuantity] = useState(1);
-
     const initializeHandler = () => {
         setSelectedSize("Regular");
         setSelectedIce("Normal Ice");
@@ -125,18 +125,16 @@ const MenuPage = () => {
         setQuantity(1);
     };
 
+    // Add to cart function.
     const dispatch = useDispatch<AppDispatch>();
-
     const getPrice = (product: Product , selectedName: string) => {
         return product.customizations.length === 0 ? 0 : (product.customizations.filter(cus => cus.cusName === selectedName)[0] ? product.customizations.filter(cus => cus.cusName === selectedName)[0].extraprice : 0);
-    }
-
+    } // Return the customization price based on user's choice.
     const getDiscount = (product: Product , amount: number) => {
         if(amount <= product.buy) return amount;
         const free = Math.floor(amount / (product.buy + product.getFree));
         return (amount - free);
-    }
-
+    } // Return the number of the items user need to pay based on buy and getFree.
     const addCartHandler = (product: Product) => {
         const sizePrice = getPrice(product, selectedSize);
         const milkPrice= getPrice(product, selectedMilk);
@@ -152,15 +150,11 @@ const MenuPage = () => {
             ice: selectedIce,
             icePrice: icePrice,
             amount: quantity,
-            price: product.buy === 0 ? ((product.baseprice + sizePrice + milkPrice + icePrice) * quantity) : ((product.baseprice + sizePrice + milkPrice + icePrice) * getDiscount(product,quantity))
+            price: product.buy === 0 ? ((product.baseprice + sizePrice + milkPrice + icePrice) * quantity) : ((product.baseprice + sizePrice + milkPrice + icePrice) * getDiscount(product,quantity)),
+            image:product.image
         }
         dispatch(addItem(item));
     }
-
-    let cart = useAppSelector((state) => state.cartReducer.value);
-    useEffect(() => {
-        console.log(cart);
-    }, [cart]);
 
     return (
         <div className="container mx-auto p-4 lg:w-3/4">
@@ -412,7 +406,7 @@ const MenuPage = () => {
                                                     </div>
                                                 </div>
                                                 <SheetFooter>
-                                                    <SheetClose className="w-full">
+                                                    <SheetClose asChild>
                                                     <Button className="w-full mt-4" variant="outline" onClick={() => {
                                                         addCartHandler(product);
                                                     }}>

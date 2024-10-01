@@ -10,7 +10,8 @@ export type ItemState = {
     ice: string,
     icePrice: number,
     amount: number,
-    price: number
+    price: number,
+    image: string
 };
 
 type CartState = {
@@ -60,7 +61,6 @@ export const cart = createSlice({
             state.lastUpdated = Date.now();
             saveState(state);
         },
-
         addItem: (state, action: PayloadAction<ItemState>) => {
             state.value.push(action.payload);
             state.lastUpdated = Date.now();

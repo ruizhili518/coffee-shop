@@ -1,8 +1,5 @@
 import React from 'react';
-import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
     Sheet,
     SheetClose,
@@ -18,6 +15,8 @@ import {
     AvatarImage,
 } from "@/components/ui/avatar"
 import {useAppSelector} from "@/lib/store";
+import {CldImage} from "next-cloudinary";
+import {MinusIcon, PlusIcon} from "lucide-react";
 
 const Cart = () => {
     let cart = useAppSelector((state) => state.cartReducer.value);
@@ -27,30 +26,55 @@ const Cart = () => {
             <SheetTrigger asChild>
                 <Avatar className="relative">
                     <AvatarImage src="/cart.png" alt="Cart" className="absolute right-0.5"/>
-                    <span className={`absolute right-1.5 top-0.5 w-4 h-4 items-center justify-center rounded-full bg-black text-white text-sm ${cart.length === 0 ? "hidden": "flex" }`}>{cart.length}</span>
+                    {/*<span className={`absolute right-1.5 top-0.5 w-4 h-4 items-center justify-center rounded-full bg-black text-white text-sm ${cart.length === 0 ? "hidden": "flex" }`}>{cart.length}</span>*/}
                 </Avatar>
             </SheetTrigger>
             <SheetContent>
                 <SheetHeader>
-                    <SheetTitle>Edit profile</SheetTitle>
+                    <SheetTitle>Cart</SheetTitle>
                     <SheetDescription>
-                        Make changes to your profile here. Click save when you're done.
+                        Add and remove items, or empty your cart.
                     </SheetDescription>
                 </SheetHeader>
-                <div className="grid gap-4 py-4">
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="name" className="text-right">
-                            Name
-                        </Label>
-                        <Input id="name" value="Pedro Duarte" className="col-span-3" />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="username" className="text-right">
-                            Username
-                        </Label>
-                        <Input id="username" value="@peduarte" className="col-span-3" />
-                    </div>
-                </div>
+                {
+                    cart.map(item => {
+                        return(
+                            <div className="flex justify-between mt-4">
+                                <div className="flex gap-2 items-center">
+                                    <CldImage alt={item.name} src={item.image} width="100" height="100"/>
+                                    <div className="flex-col">
+                                        <div className="font-bold">{item.name}</div>
+                                        <div className="font-light text-sm text-gray-400">
+                                            <div>
+                                                - {item.size}
+                                            </div>
+                                            <div>
+                                                - {item.ice}
+                                            </div>
+                                            <div>
+                                                - {item.milk}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="flex-col justify-between">
+                                    <div className="flex justify-center items-center gap-2">
+                                        <Button variant="outline" size="icon" className="rounded-full w-6 h-6">
+                                            <MinusIcon className="w-4"/>
+                                        </Button>
+                                        <div>{item.amount}</div>
+                                        <Button size="icon" className="rounded-full w-6 h-6">
+                                            <PlusIcon className="w-4"/>
+                                        </Button>
+                                    </div>
+                                    <div>
+                                        $ {item.price}
+                                    </div>
+                                </div>
+                            </div>
+                        )
+                    })
+                }
                 <SheetFooter>
                     <SheetClose asChild>
                         <Button type="submit">Save changes</Button>
