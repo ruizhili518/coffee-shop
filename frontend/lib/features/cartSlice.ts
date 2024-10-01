@@ -1,8 +1,8 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import {Product} from "@/lib/types";
 
 export type ItemState = {
     time: number,
-    name: string,
     size: string,
     sizePrice: number,
     milk: string,
@@ -11,7 +11,7 @@ export type ItemState = {
     icePrice: number,
     amount: number,
     price: number,
-    image: string
+    product: Product
 };
 
 type CartState = {
@@ -19,9 +19,9 @@ type CartState = {
     lastUpdated: number;
 };
 
+// Using local storage to store the cart state for 15 min.
 const STORAGE_KEY = 'cartState';
 const EXPIRATION_TIME = 15 * 60 * 1000;
-
 const loadState = (): CartState => {
     try {
         const serializedState = localStorage.getItem(STORAGE_KEY);
@@ -37,7 +37,6 @@ const loadState = (): CartState => {
         return { value: [], lastUpdated: Date.now() };
     }
 };
-
 const saveState = (state: CartState) => {
     try {
         const serializedState = JSON.stringify({
@@ -49,8 +48,13 @@ const saveState = (state: CartState) => {
         // Ignore write errors
     }
 };
-
 const initialState: CartState = loadState();
+
+const getDiscount = (product: Product , amount: number) => {
+    if(amount <= product.buy) return amount;
+    const free = Math.floor(amount / (product.buy + product.getFree));
+    return (amount - free);
+} // Return the number of the items user need to pay based on buy and getFree.
 
 export const cart = createSlice({
     name: 'cart',
@@ -66,14 +70,29 @@ export const cart = createSlice({
             state.lastUpdated = Date.now();
             saveState(state);
         },
-        deleteItem: (state, action: PayloadAction<number>) => {
-            state.value = state.value.filter(item => item.time !== action.payload);
+        addItemQuantity: (state, action: PayloadAction<number>) => {
+            const selectedItem = state.value.filter(item => item.time === action.payload)[0];
+            const unitPrice = selectedItem.product.baseprice + selectedItem.milkPrice + selectedItem.sizePrice + selectedItem.icePrice;
+            selectedItem.amount = selectedItem.amount + 1;
+            selectedItem.price = selectedItem.product.buy === 0 ? (unitPrice * selectedItem.amount) : (unitPrice * getDiscount(selectedItem.product, selectedItem.amount));
+            state.lastUpdated = Date.now();
+            saveState(state);
+        },
+        minusItemQuantity: (state, action: PayloadAction<number>) => {
+            const selectedItem = state.value.filter(item => item.time === action.payload)[0];
+            if(selectedItem.amount === 1){
+                state.value = state.value.filter(item => item.time !== action.payload);
+            }else{
+                const unitPrice = selectedItem.product.baseprice + selectedItem.milkPrice + selectedItem.sizePrice + selectedItem.icePrice;
+                selectedItem.amount = selectedItem.amount - 1;
+                selectedItem.price = selectedItem.product.buy === 0 ? (unitPrice * selectedItem.amount) : (unitPrice * getDiscount(selectedItem.product, selectedItem.amount));
+            }
             state.lastUpdated = Date.now();
             saveState(state);
         }
     }
 });
 
-export const {emptyCart, addItem, deleteItem} = cart.actions;
+export const {emptyCart, addItem, addItemQuantity, minusItemQuantity} = cart.actions;
 
 export default cart.reducer;

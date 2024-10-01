@@ -50,28 +50,11 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import {Customization, Product} from "@/lib/types";
 
 const ProductPage = () => {
     const router = useRouter();
-    // Initialize product and customization type.
-    type Customization = {
-        cusCategory: string,
-        cusName: string,
-        extraprice: number
-    }
-    type Product = {
-        name:string,
-        status:string,
-        baseprice:number,
-        description:string,
-        category:string,
-        image:string,
-        buy:number,
-        getFree:number,
-        customizations:Customization[],
-        _id:string,
-        updatedAt: string
-    }
+
 
     // Initialize state to manipulate products data.
     const [products, setProducts] = useState([{

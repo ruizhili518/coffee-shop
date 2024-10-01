@@ -24,27 +24,10 @@ import {ScrollArea} from "@/components/ui/scroll-area";
 import {useDispatch} from "react-redux";
 import {AppDispatch} from "@/lib/store";
 import {addItem, ItemState} from "@/lib/features/cartSlice";
+import {MinusIcon, PlusIcon} from "lucide-react";
+import {Customization, Product} from "@/lib/types";
 
 const MenuPage = () => {
-    type Customization = {
-        cusCategory: string,
-        cusName: string,
-        extraprice: number
-    }
-    type Product = {
-        name:string,
-        status:string,
-        baseprice:number,
-        description:string,
-        category:string,
-        image:string,
-        buy:number,
-        getFree:number,
-        customizations:Customization[],
-        _id:string,
-        updatedAt: string
-    }
-
     // Initialize state to get products data.
     const [products, setProducts] = useState([{
         name:"",
@@ -142,7 +125,6 @@ const MenuPage = () => {
         const time = Date.now();
         const item: ItemState = {
             time: time,
-            name: product.name,
             size: selectedSize,
             sizePrice: sizePrice,
             milk: selectedMilk,
@@ -151,7 +133,7 @@ const MenuPage = () => {
             icePrice: icePrice,
             amount: quantity,
             price: product.buy === 0 ? ((product.baseprice + sizePrice + milkPrice + icePrice) * quantity) : ((product.baseprice + sizePrice + milkPrice + icePrice) * getDiscount(product,quantity)),
-            image:product.image
+            product: product
         }
         dispatch(addItem(item));
     }
@@ -249,7 +231,7 @@ const MenuPage = () => {
                                 <CardContent className="p-4">
                                     <Image src={product.image} alt={product.name} width="120" height="120"
                                            className="aspect-square w-full rounded-md object-contain mb-2"/>
-                                    <div className="flex-col">
+                                    <div className="flex flex-col">
                                         <div className="flex justify-between items-center">
                                             <div className="text-sm font-semibold">{product.name}</div>
                                             <span className="text-lg font-bold">
@@ -286,7 +268,7 @@ const MenuPage = () => {
                                         </SheetTrigger>
                                         <SheetContent>
                                             <ScrollArea className="h-[calc(100vh-3rem)]">
-                                                <SheetHeader className="my-4 flex-col">
+                                                <SheetHeader className="my-4 flex flex-col">
                                                     <Image src={product.image} alt={product.name} width={300}
                                                            height={300} className="self-center"/>
                                                     <SheetTitle>{product.name}</SheetTitle>
@@ -295,14 +277,14 @@ const MenuPage = () => {
                                                     </SheetDescription>
                                                 </SheetHeader>
                                                 <Separator/>
-                                                <SheetHeader className="mt-4 flex-col">
+                                                <SheetHeader className="mt-4 flex flex-col">
                                                     <SheetTitle>
                                                         {uniqueCusCategories[0] !== "" && "Customization:"}
                                                     </SheetTitle>
                                                     {
                                                         uniqueCusCategories[0] !== "" &&
                                                         uniqueCusCategories.map((category, index) => (
-                                                            <SheetDescription className="flex-col">
+                                                            <SheetDescription className="flex flex-col">
                                                                 <Badge className="flex w-16 justify-center mb-4"
                                                                        variant="outline">
                                                                     {category}
@@ -387,14 +369,12 @@ const MenuPage = () => {
                                                 </SheetHeader>
                                                 <div className="flex items-center justify-between w-3/4 mt-4">
                                                     <div className="flex items-center space-x-4">
-                                                        <Button variant="outline" size="icon" className="rounded-full text-xl"
-                                                                onClick={() => setQuantity(Math.max(1, quantity - 1))}>
-                                                            -
+                                                        <Button variant="outline" size="icon" className="rounded-full w-6 h-6" onClick={() => setQuantity(Math.max(1, quantity - 1))}>
+                                                            <MinusIcon className="w-4"/>
                                                         </Button>
                                                         <span>{quantity}</span>
-                                                        <Button variant="outline" size="icon" className="rounded-full text-xl"
-                                                                onClick={() => setQuantity(quantity + 1)}>
-                                                            +
+                                                        <Button size="icon" className="rounded-full w-6 h-6" onClick={() => setQuantity(quantity + 1)}>
+                                                            <PlusIcon className="w-4"/>
                                                         </Button>
                                                     </div>
                                                     <div className="text-2xl font-bold">
