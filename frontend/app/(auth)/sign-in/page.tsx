@@ -68,7 +68,7 @@ const SignInPage = () => {
 
             dispatch(signInAuth(userInfo));
             setDisplayErr('hidden'); //Hide the error message.
-            router.push('/');
+            router.push('/menu');
         }catch (err: any){
             if(err.status ===401){
                 setDisplayErr('block'); //Display the error message.
