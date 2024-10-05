@@ -68,7 +68,7 @@ export const deleteProduct = async (req, res)=>{
         }
         await Product.findByIdAndDelete(req.params.id);
 
-        res.json({message:"Product deleted successfully."});
+        res.status(200).json({message:"Product deleted successfully."});
     }catch(err){
         console.log("Error in deleteProduct.", err.message);
         res.status(500).json({message: 'Server error', error: err.message});
@@ -78,7 +78,11 @@ export const deleteProduct = async (req, res)=>{
 export const getProductById = async (req, res) => {
     try {
         const productData = await Product.findById(req.params.id);
+        if(productData){
         res.status(200).json({productData,message:"Get product successfully."})
+        }else{
+            res.status(403).json({message: "Product doesn't exist. Please try again."})
+        }
     }catch (err){
         console.log("Error in getProductById.", err.message);
         res.status(500).json({message: 'Server error', error: err.message});

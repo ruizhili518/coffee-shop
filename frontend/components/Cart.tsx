@@ -131,7 +131,7 @@ const Cart = () => {
                 {
                     cartSize !== 0 &&
                     <div className="w-10/12 py-4 flex font-bold justify-end">
-                        Subtotal: $ {subtotal}
+                        Subtotal: $ {subtotal.toFixed(2)}
                     </div>
                 }
                 {
