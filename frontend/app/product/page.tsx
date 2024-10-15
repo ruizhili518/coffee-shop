@@ -51,10 +51,13 @@ import {
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import {Customization, Product} from "@/lib/types";
+import {useDispatch} from "react-redux";
+import {finishLoading} from "@/lib/features/loadingSlice";
+import {AppDispatch} from "@/lib/store";
 
 const ProductPage = () => {
     const router = useRouter();
-
+    const dispatch = useDispatch<AppDispatch>();
 
     // Initialize state to manipulate products data.
     const [products, setProducts] = useState([{

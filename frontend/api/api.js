@@ -65,4 +65,11 @@ export const updateProductById = (id, value) => {
         method: 'POST',
         data: value
     })
-}
+};
+
+export const getGetPointRatio = () => {
+    return http.request({
+        url: '/points/points-get',
+        method: 'GET'
+    })
+};

@@ -35,4 +35,6 @@ const Hero = () => {
     )
 }
 
-export default Hero
+export default Hero;
+
+//TODO: Toggle button status based on user.

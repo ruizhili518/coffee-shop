@@ -1,3 +1,4 @@
+'use client';
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -8,10 +9,32 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+import {getGetPointRatio} from "@/api/api";
+import {useEffect, useState} from "react";
+import {useDispatch} from "react-redux";
+import {AppDispatch} from "@/lib/store";
+import {finishLoading} from "@/lib/features/loadingSlice";
 
 const Page = () => {
+    const dispatch = useDispatch<AppDispatch>();
+    const [getRatio, setGetRatio] = useState(0);
+    const [redeemRatio, setRedeemRatio] = useState(0);
+
+    const getPointsRatio = async () =>{
+        try{
+            const res = await getGetPointRatio();
+            const value = res.data.ratio.ratio;
+            setGetRatio(value);
+        }catch (e){
+            console.log(e);
+        }
+    };
+
+    useEffect(() => {
+        getPointsRatio();
+    }, []);
+
     return (
         <div className="flex min-h-[calc(90vh_-_theme(spacing.16))] flex-1 flex-col gap-4 p-4 md:gap-8">
             <div className="mx-auto grid w-full max-w-6xl gap-2">
@@ -29,13 +52,11 @@ const Page = () => {
                             <CardHeader>
                                 <CardTitle>Get points ratio</CardTitle>
                                 <CardDescription>
-                                    Determine how many points customers get for every $1 spend.
+                                    Determine how many points customers get for every $1 spend. (1 $ = {getRatio} points)
                                 </CardDescription>
                             </CardHeader>
                             <CardContent>
-                                <form>
-                                    <Input placeholder="Get Points Ratio" defaultValue="/content/plugins"/>
-                                </form>
+                                <Input placeholder="Get Points Ratio" defaultValue={getRatio}/>
                             </CardContent>
                             <CardFooter className="border-t px-6 py-4">
                                 <Button>Save</Button>
@@ -49,12 +70,10 @@ const Page = () => {
                                 </CardDescription>
                             </CardHeader>
                             <CardContent>
-                                <form className="flex flex-col gap-4">
-                                    <Input
-                                        placeholder="Redeem points ratio"
-                                        defaultValue="/content/plugins"
-                                    />
-                                </form>
+                                <Input
+                                    placeholder="Redeem points ratio"
+                                    defaultValue="/content/plugins"
+                                />
                             </CardContent>
                             <CardFooter className="border-t px-6 py-4">
                                 <Button>Save</Button>

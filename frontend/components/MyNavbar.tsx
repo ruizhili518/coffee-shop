@@ -36,8 +36,8 @@ import {AppDispatch, useAppSelector} from "@/lib/store";
 import {AuthState, signInAuth, signOutAuth} from "@/lib/features/authSlice";
 import {getProfile, signOut} from "@/api/api";
 import {useEffect, useState} from "react";
-import {useDispatch} from "react-redux";
 import Cart from "@/components/Cart";
+import {useDispatch} from "react-redux";
 
 const Navbar = () => {
     const dispatch = useDispatch<AppDispatch>();
@@ -93,7 +93,7 @@ const Navbar = () => {
     // Sign out handler.
     const signOutHandler = async () => {
         try{
-            const res = await signOut();
+            await signOut();
             dispatch(signOutAuth());
             toggleModal()
             router.push("/");

@@ -152,3 +152,5 @@ const Cart = () => {
 }
 
 export default Cart;
+
+//TODO: Toggle Checkout button based on cart size. If 0, toggle to add item => Menu page.
