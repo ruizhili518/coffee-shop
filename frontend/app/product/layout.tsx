@@ -4,8 +4,6 @@ import NavBar from '@/components/MyNavbar';
 import Footer from "@/components/Footer";
 import {useDispatch} from "react-redux";
 import {AppDispatch, useAppSelector} from "@/lib/store";
-import LoadingPage from "@/components/LoadingPage";
-
 
 const ProductLayout = ({ children }: Readonly<{ children: ReactNode }>) => {
     const dispatch = useDispatch<AppDispatch>();

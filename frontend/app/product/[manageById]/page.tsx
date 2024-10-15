@@ -45,7 +45,7 @@ import React, {useEffect, useRef, useState} from "react";
 import { getProductById, updateProductById} from "@/api/api";
 import MyAlert from "@/components/ui/MyAlert";
 import {useRouter} from "next/navigation";
-import Loading from "@/components/ui/Loading";
+import LoadingPage from "@/components/LoadingPage";
 
 const Page = ({ params }: { params: { manageById: string } }) => {
     const router = useRouter();
@@ -224,17 +224,14 @@ const Page = ({ params }: { params: { manageById: string } }) => {
         }
     }, [productData]);
 
-
+    if(isLoading){
+        return <LoadingPage/>
+    }
     return (
 
         <div className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
             <MyAlert isVisible={showAlert} title={alertTitle} desc={alertDesc}/>
-            {isLoading ? (
-                <div className="mx-auto grid max-w-[59rem] flex-1 auto-rows-max gap-4">
-                    <Loading/>
-                </div>
-            ) :
-                (<FormProvider {...methods}>
+            <FormProvider {...methods}>
                     <form onSubmit={handleSubmit(onSubmit)} className="mx-auto grid max-w-[59rem] flex-1 auto-rows-max gap-4">
                         <div className="flex items-center gap-4">
                             <Button type="button" variant="outline" size="icon" className="h-7 w-7" onClick={() => {router.push('/product')}}>
@@ -608,8 +605,7 @@ const Page = ({ params }: { params: { manageById: string } }) => {
                             <Button size="sm" type="submit">Save Product</Button>
                         </div>
                     </form>
-                </FormProvider>)
-            }
+                </FormProvider>
         </div>
     );
 };

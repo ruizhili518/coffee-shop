@@ -10,31 +10,52 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import {getGetPointRatio} from "@/api/api";
+import {getGetPointRatio, getRedeemPointRatio, manageGetPointsRatio, manageRedeemPointsRatio} from "@/api/api";
 import {useEffect, useState} from "react";
-import {useDispatch} from "react-redux";
-import {AppDispatch} from "@/lib/store";
-import {finishLoading} from "@/lib/features/loadingSlice";
+import LoadingPage from "@/components/LoadingPage";
 
 const Page = () => {
-    const dispatch = useDispatch<AppDispatch>();
     const [getRatio, setGetRatio] = useState(0);
     const [redeemRatio, setRedeemRatio] = useState(0);
+    const [loading, setLoading] = useState(true);
 
-    const getPointsRatio = async () =>{
+    // Function to get initial values.
+    const getInitialRatio = async () =>{
         try{
-            const res = await getGetPointRatio();
-            const value = res.data.ratio.ratio;
-            setGetRatio(value);
+            const getRes = await getGetPointRatio();
+            const redeemRes = await getRedeemPointRatio();
+            setGetRatio(getRes.data.ratio.ratio);
+            setRedeemRatio(redeemRes.data.ratio.ratio);
+            setLoading(false);
         }catch (e){
             console.log(e);
         }
     };
 
+    // Handler to manage all changes.
+    const manageGetRatioHandler = async () => {
+        try {
+            await manageGetPointsRatio({getRatio});
+        }catch (e){
+            console.log(e);
+        }
+    }
+    const manageRedeemRatioHandler = async () => {
+        try {
+            await manageRedeemPointsRatio({redeemRatio});
+        }catch (e){
+            console.log(e);
+        }
+    }
+
+    // Initial call when open the page.
     useEffect(() => {
-        getPointsRatio();
+        getInitialRatio();
     }, []);
 
+    if(loading){
+        return <LoadingPage/>
+    }
     return (
         <div className="flex min-h-[calc(90vh_-_theme(spacing.16))] flex-1 flex-col gap-4 p-4 md:gap-8">
             <div className="mx-auto grid w-full max-w-6xl gap-2">
@@ -56,27 +77,32 @@ const Page = () => {
                                 </CardDescription>
                             </CardHeader>
                             <CardContent>
-                                <Input placeholder="Get Points Ratio" defaultValue={getRatio}/>
+                                <Input placeholder="Get Points Ratio" defaultValue={getRatio} onChange={(e) => {
+                                    setGetRatio(Number(e.target.value))
+                                }}/>
                             </CardContent>
                             <CardFooter className="border-t px-6 py-4">
-                                <Button>Save</Button>
+                                <Button onClick={manageGetRatioHandler}>Save</Button>
                             </CardFooter>
                         </Card>
                         <Card>
                             <CardHeader>
                                 <CardTitle>Redeem points ratio</CardTitle>
                                 <CardDescription>
-                                    Determine how many dollars each point can be redeemed for.
+                                    Determine how many dollars each point can be redeemed for. (1 point = {redeemRatio} $)
                                 </CardDescription>
                             </CardHeader>
                             <CardContent>
                                 <Input
                                     placeholder="Redeem points ratio"
-                                    defaultValue="/content/plugins"
+                                    defaultValue={redeemRatio}
+                                    onChange={(e) => {
+                                        setRedeemRatio(Number(e.target.value))
+                                    }}
                                 />
                             </CardContent>
                             <CardFooter className="border-t px-6 py-4">
-                                <Button>Save</Button>
+                                <Button onClick={manageRedeemRatioHandler}>Save</Button>
                             </CardFooter>
                         </Card>
                     </div>

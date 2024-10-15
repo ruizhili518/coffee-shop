@@ -6,7 +6,6 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import Loading from "@/components/ui/Loading";
 import Image from "next/image";
 import {Badge} from "@/components/ui/badge";
 import {
@@ -26,6 +25,7 @@ import {AppDispatch} from "@/lib/store";
 import {addItem, ItemState} from "@/lib/features/cartSlice";
 import {MinusIcon, PlusIcon} from "lucide-react";
 import {Customization, Product} from "@/lib/types";
+import LoadingPage from "@/components/LoadingPage";
 
 const MenuPage = () => {
     // Initialize state to get products data.
@@ -64,7 +64,6 @@ const MenuPage = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
     const [filteredProducts, setFilteredProducts] = useState(products);
-    const [productPrice, setProductPrice] = useState(0);
     useEffect(() => {
         let result = products
         // Apply search filter
@@ -137,7 +136,9 @@ const MenuPage = () => {
         }
         dispatch(addItem(item));
     }
-
+    if(isLoading){
+        return <LoadingPage/>
+    }
     return (
         <div className="container mx-auto p-4 lg:w-3/4">
             <div className="flex flex-col md:flex-row gap-6">
@@ -202,7 +203,7 @@ const MenuPage = () => {
                     </div>
                     <div className="hidden md:block mt-6 p-4 rounded-lg border">
                         <h3 className="text-lg font-semibold mb-2">Top sellers</h3>
-                        {!isLoading ?
+                        {
                             products.slice(0, 4).map(product => (
                                 <div key={product._id} className="flex items-center mb-4">
                                     <img src={product.image} alt={product.name}
@@ -212,14 +213,12 @@ const MenuPage = () => {
                                         <span className="text-sm">${product.baseprice.toFixed(2)}</span>
                                     </div>
                                 </div>
-                            )) :
-                            <div className="flex w-full justify-center">
-                                <Loading/>
-                            </div>}
+                            ))
+                        }
                     </div>
                 </div>
                 <div className="md:w-3/4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {!isLoading ?
+                    {
                         filteredProducts.map(product => {
                             const uniqueCusCategories: string[] = Array.from(
                                 new Set<string>(product.customizations.map((customization: Customization) => customization.cusCategory)),
@@ -400,10 +399,7 @@ const MenuPage = () => {
                                 </CardFooter>
                                 </Card>
                             )
-                        }) :
-                        <div className="flex w-full justify-center">
-                            <Loading/>
-                        </div>
+                        })
                     }
                 </div>
             </div>

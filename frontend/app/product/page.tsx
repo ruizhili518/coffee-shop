@@ -37,7 +37,6 @@ import {
 import {useRouter} from "next/navigation";
 import {deleteProductById, getAllProducts} from "@/api/api";
 import React, {useCallback, useEffect, useState} from "react";
-import Loading from "@/components/ui/Loading";
 import { CldImage } from "next-cloudinary";
 import {
     AlertDialog,
@@ -51,14 +50,10 @@ import {
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import {Customization, Product} from "@/lib/types";
-import {useDispatch} from "react-redux";
-import {finishLoading} from "@/lib/features/loadingSlice";
-import {AppDispatch} from "@/lib/store";
+import LoadingPage from "@/components/LoadingPage";
 
 const ProductPage = () => {
     const router = useRouter();
-    const dispatch = useDispatch<AppDispatch>();
-
     // Initialize state to manipulate products data.
     const [products, setProducts] = useState([{
         name:"",
@@ -144,6 +139,9 @@ const ProductPage = () => {
         setDialogOpen(true);
     }, [])
 
+    {if(loading)
+        return <LoadingPage/>
+    }
     return (
         <div className="flex min-h-screen flex-col items-center">
             <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14 w-full lg:px-14">
@@ -199,7 +197,7 @@ const ProductPage = () => {
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
-                                            { !loading ? products.map(product => {
+                                            { products.map(product => {
                                                     // @ts-ignore
                                                     const uniqueCusCategories: string[] = Array.from(
                                                         new Set<string>(product.customizations.map((customization: Customization) => customization.cusCategory)),
@@ -300,13 +298,7 @@ const ProductPage = () => {
                                                         </TableCell>
                                                     </TableRow>
                                                 )
-                                            }) :
-                                                <TableRow>
-                                                    <TableCell colSpan={8} className="w-full">
-                                                        <Loading/>
-                                                    </TableCell>
-                                                </TableRow>
-                                            }
+                                            })}
                                         </TableBody>
                                     </Table>
                                 </CardContent>
@@ -352,7 +344,7 @@ const ProductPage = () => {
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
-                                            { !loading ? activeProducts.map(product => {
+                                            { activeProducts.map(product => {
                                                     // @ts-ignore
                                                     const uniqueCusCategories: string[] = Array.from(
                                                         new Set<string>(product.customizations.map((customization: Customization) => customization.cusCategory)),
@@ -453,13 +445,7 @@ const ProductPage = () => {
                                                             </TableCell>
                                                         </TableRow>
                                                     )
-                                                }) :
-                                                <TableRow>
-                                                    <TableCell colSpan={8} className="w-full">
-                                                        <Loading/>
-                                                    </TableCell>
-                                                </TableRow>
-                                            }
+                                                })}
                                         </TableBody>
                                     </Table>
                                 </CardContent>
@@ -506,7 +492,7 @@ const ProductPage = () => {
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
-                                            { !loading ? inactiveProducts.map(product => {
+                                            { inactiveProducts.map(product => {
                                                     // @ts-ignore
                                                     const uniqueCusCategories: string[] = Array.from(
                                                         new Set<string>(product.customizations.map((customization: Customization) => customization.cusCategory)),
@@ -607,13 +593,7 @@ const ProductPage = () => {
                                                             </TableCell>
                                                         </TableRow>
                                                     )
-                                                }) :
-                                                <TableRow>
-                                                    <TableCell colSpan={8} className="w-full">
-                                                        <Loading/>
-                                                    </TableCell>
-                                                </TableRow>
-                                            }
+                                                })}
                                         </TableBody>
                                     </Table>
                                 </CardContent>

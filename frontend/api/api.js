@@ -73,3 +73,26 @@ export const getGetPointRatio = () => {
         method: 'GET'
     })
 };
+
+export const getRedeemPointRatio = () => {
+    return http.request({
+        url: '/points/points-redeem',
+        method: 'GET'
+    })
+};
+
+export const manageGetPointsRatio = (value) => {
+    return http.request({
+        url: '/points/points-get',
+        method: 'POST',
+        data:value
+    })
+};
+
+export const manageRedeemPointsRatio = (value) => {
+    return http.request({
+        url: '/points/points-redeem',
+        method: 'POST',
+        data:value
+    })
+};
