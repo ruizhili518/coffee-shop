@@ -4,7 +4,6 @@ const initialState = {
     value: {
         username: "",
         userId: 0,
-        coupons: [],
         customerName: "",
         orderHistory: [],
         email: "",
@@ -16,7 +15,6 @@ const initialState = {
 export type AuthState = {
     username: string,
     userId: number,
-    coupons: Array<object>,
     customerName: string,
     orderHistory: Array<object>,
     email: string,

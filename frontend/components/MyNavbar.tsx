@@ -51,7 +51,6 @@ const Navbar = () => {
                 const userInfo : AuthState = {
                     username: res.data.user.username,
                     userId: res.data.user.userId,
-                    coupons : res.data.user.coupons,
                     customerName : res.data.user.customerName,
                     orderHistory: res.data.user.orderHistory,
                     email : res.data.user.email,
@@ -78,7 +77,7 @@ const Navbar = () => {
     ];
 
     const superAdminMenu = [
-        [ "/" , "Home"], [ "/menu", "Menu"] , [ "/" , "Order History" ], [ "/product" , "Manage Product" ] , [ "/store/coupons", "Manage Store"]
+        [ "/" , "Home"], [ "/menu", "Menu"] , [ "/" , "Order History" ], [ "/product" , "Manage Product" ] , [ "/store", "Manage Store"]
     ];
 
     const [menu, setMenu] = useState(userMenu);

@@ -1,4 +1,4 @@
-import {ReactNode, useEffect} from 'react';
+import {ReactNode} from 'react';
 import NavBar from '@/components/MyNavbar';
 import Footer from "@/components/Footer";
 
