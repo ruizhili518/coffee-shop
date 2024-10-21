@@ -1,8 +1,14 @@
+'use client';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import Image from "next/image";
+import {useAppSelector} from "@/lib/store";
+import {useRouter} from "next/navigation";
 
 const Hero = () => {
+    const userInfo = useAppSelector((state) => state.authReducer.value);
+    const router = useRouter();
+
     return (
         <section className="flex justify-center">
             <div className='container'>
@@ -16,16 +22,25 @@ const Hero = () => {
                             This is where Unique meets Magic. A space where creativity flows as freely as our coffee. A place to gather, unwind, and be inspired. Start discovering a one-of-a-kind coffee experience now!
                         </p>
                         <div className='flex w-full flex-col justify-center gap-2 sm:flex-row lg:justify-start'>
-                            <Button className='w-full sm:w-auto'>
+                            <Button className='w-full sm:w-auto' onClick={() => {
+                                userInfo.role === "ROLE_VISITOR" ? router.push('/sign-in') : router.push('/menu')
+                            }}>
                                 <ArrowRight className='mr-2 size-4' />
-                                Sign In & Order
+                                {
+                                    userInfo.role === "ROLE_VISITOR" ? `Sign In & Order` : `Order Now`
+                                }
                             </Button>
-                            <Button
-                                variant='outline'
-                                className='w-full sm:w-auto'
-                            >
-                                Order as a visitor
-                            </Button>
+                            { userInfo.role === "ROLE_VISITOR" &&
+                                <Button
+                                    variant='outline'
+                                    className='w-full sm:w-auto'
+                                    onClick={() => {
+                                        router.push('/menu')
+                                    }}
+                                >
+                                    Order as a visitor
+                                </Button>
+                            }
                         </div>
                     </div>
                     <Image src="/hero.jpg" height="500" width="1000" alt="hero"/>

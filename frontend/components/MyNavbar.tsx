@@ -71,11 +71,9 @@ const Navbar = () => {
     const userMenu = [
         [ "/" , "Home"], [ "/menu", "Menu"]
     ];
-
     const adminMenu = [
         [ "/" , "Home"], [ "/menu", "Menu"] , [ "/" , "Order History" ]
     ];
-
     const superAdminMenu = [
         [ "/" , "Home"], [ "/menu", "Menu"] , [ "/" , "Order History" ], [ "/product" , "Manage Product" ] , [ "/store", "Manage Store"]
     ];
@@ -84,7 +82,6 @@ const Navbar = () => {
 
     // Use to control if the modal shown on the page.
     const [modal, setModal] = useState(false);
-
     const toggleModal = () => {
         setModal(!modal);
     };

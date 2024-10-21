@@ -25,14 +25,6 @@ const userSchema = new mongoose.Schema({
         type:Number,
         default: 0
     },
-    coupons: [
-        {
-            coupon: {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: 'Coupon'
-            }
-        }
-    ],
     orderHistory: [
         {
             orderNumber: {

@@ -17,7 +17,7 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-const allowedOrigins = [process.env.FRONTEND_URL,process.env.FRONTEND_STORE];
+const allowedOrigins = [process.env.FRONTEND_URL];
 const corsOptions = {
     origin: function (origin, callback) {
         if (allowedOrigins.includes(origin)) {
@@ -29,17 +29,17 @@ const corsOptions = {
     credentials: true
 };
 
-//TODO: Modify this cors problem before deploy ( solve local cookie problem ).
+//TODO: Double check this cors problem before deploy ( solve local cookie problem ).
 
 //Middle wares
 app.use(cors(corsOptions)); // Allow CORS.
 app.use(express.json()); // Parse request body.
 app.use(cookieParser());
 
+//Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/product",productRoutes);
 app.use("/api/points",pointsRoutes);
-
 
 app.listen(PORT, () => {
     console.log(`Server started on http://localhost:${PORT}...`);
