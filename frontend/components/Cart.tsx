@@ -47,6 +47,12 @@ const Cart = () => {
         dispatch(minusItemQuantity(time));
     };
 
+    // Checkout handler
+    const checkoutHandler = () => {
+        console.log(cart);
+        console.log(subtotal);
+    }
+
     return (
         <Sheet>
             <SheetTrigger asChild>
@@ -142,7 +148,8 @@ const Cart = () => {
                 }
                     <SheetFooter className="flex justify-start w-10/12">
                         <SheetClose asChild>
-                            <Button variant="outline" className="w-full">Check Out</Button>
+                            <Button variant="outline" className="w-full" onClick={checkoutHandler}
+                            >Check Out</Button>
                         </SheetClose>
                 </SheetFooter>
                 </ScrollArea>
