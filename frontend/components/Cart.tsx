@@ -22,8 +22,11 @@ import {useDispatch} from "react-redux";
 import {addItemQuantity, deleteItem, minusItemQuantity} from "@/lib/features/cartSlice";
 import {ScrollArea} from "@/components/ui/scroll-area";
 import Image from "next/image";
+import {useRouter} from "next/navigation";
 
 const Cart = () => {
+    const router = useRouter();
+
     // Create cart slice, modify cart size and subtotal prize by state.
     let cart = useAppSelector((state) => state.cartReducer.value);
     const [ cartSize, setCartSize ] = useState(0);
@@ -80,21 +83,21 @@ const Cart = () => {
                                             {item.product.customizations.map(cus => {
                                                 if (cus.cusName === item.size) {
                                                     return (
-                                                        <div>
+                                                        <div key={item.size+item.sizePrice}>
                                                             - {item.size}
                                                         </div>
                                                     )
                                                 }
                                                 if (cus.cusName === item.ice) {
                                                     return (
-                                                        <div>
+                                                        <div key={item.ice+item.icePrice}>
                                                             - {item.ice}
                                                         </div>
                                                     )
                                                 }
                                                 if (cus.cusName === item.milk) {
                                                     return (
-                                                        <div>
+                                                        <div key={item.milk+item.milkPrice}>
                                                             - {item.milk}
                                                         </div>
                                                     )
@@ -107,14 +110,14 @@ const Cart = () => {
                                 </div>
                                 <div className="py-2 flex justify-between items-center">
                                     <div className="flex justify-center items-center gap-2 px-2">
-                                        <Button variant="secondary" size="icon" className="rounded-full w-6 h-6"
+                                        <Button variant="outline" size="icon" className="rounded-full w-6 h-6"
                                                 onClick={() => {
                                                     minusQuantityHandler(item.time)
                                                 }}>
                                             <MinusIcon className="w-4"/>
                                         </Button>
                                         <div>{item.amount}</div>
-                                        <Button variant="outline" size="icon" className="rounded-full w-6 h-6"
+                                        <Button variant="outline" size="icon" className="rounded-full w-6 h-6 bg-black text-white"
                                                 onClick={() => {
                                                     addQuantityHandler(item.time)
                                                 }}>
@@ -143,13 +146,18 @@ const Cart = () => {
                 {
                     cartSize === 0 &&
                     <div className="my-4 w-11/12">
-                        As you add menu items, they'll appear here. You'll have a chance to review before placing your order.
+                        As you add menu items, they will appear here. You will have a chance to review before placing your order.
                     </div>
                 }
                     <SheetFooter className="flex justify-start w-10/12">
                         <SheetClose asChild>
+                            { cart.length === 0 ?
+                                <Button variant="outline" className="w-full" onClick={() => {router.push("/menu")}}>
+                                    Go to the Menu
+                                </Button>:
                             <Button variant="outline" className="w-full" onClick={checkoutHandler}
                             >Check Out</Button>
+                            }
                         </SheetClose>
                 </SheetFooter>
                 </ScrollArea>

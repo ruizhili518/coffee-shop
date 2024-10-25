@@ -13,6 +13,10 @@ const orderSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Customer name is required.']
     },
+    userId: {
+        type: Number,
+        unique: true,
+    },
     memo: {
         type: String,
         default: ""
