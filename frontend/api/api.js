@@ -96,3 +96,11 @@ export const manageRedeemPointsRatio = (value) => {
         data:value
     })
 };
+
+export const createCheckout = (value) => {
+    return http.request({
+        url: '/order/create-checkout-session',
+        method: 'POST',
+        data: value
+    })
+}

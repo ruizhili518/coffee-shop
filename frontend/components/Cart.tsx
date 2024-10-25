@@ -52,8 +52,7 @@ const Cart = () => {
 
     // Checkout handler
     const checkoutHandler = () => {
-        console.log(cart);
-        console.log(subtotal);
+        cart.length !== 0 && router.push('/checkout');
     }
 
     return (

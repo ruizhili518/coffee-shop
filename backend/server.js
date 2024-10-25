@@ -7,6 +7,7 @@ import cookieParser from 'cookie-parser';
 import authRoutes from './routes/auth.route.js';
 import productRoutes from './routes/product.route.js';
 import pointsRoutes from './routes/points.route.js';
+import orderRoutes from './routes/order.route.js';
 import cors from 'cors';
 
 // Tools
@@ -40,6 +41,7 @@ app.use(cookieParser());
 app.use("/api/auth", authRoutes);
 app.use("/api/product",productRoutes);
 app.use("/api/points",pointsRoutes);
+app.use("/api/order",orderRoutes);
 
 app.listen(PORT, () => {
     console.log(`Server started on http://localhost:${PORT}...`);

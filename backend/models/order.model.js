@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import {Product} from "../../frontend/lib/types.js";
 
 const orderSchema = new mongoose.Schema({
     orderNumber: {
@@ -25,7 +24,13 @@ const orderSchema = new mongoose.Schema({
         type: Number,
         required: [true, 'Price is required.']
     },
-    item:[
+    pointsRedeem: {
+        type: Number
+    },
+    pointsGet: {
+        type: Number
+    },
+    items:[
         {
             time: {
                 type: Number

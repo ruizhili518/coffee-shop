@@ -22,8 +22,20 @@ const initializeCounter = async () => {
             seq: 1000
         });
         await newCounter.save();
-        console.log('Counter initialized to 1000.');
+        console.log('User Counter initialized to 1000.');
     }else{
         console.log('Counter already exists:', userCounter);
+    }
+
+    const orderCounter = await Counter.findById('orderNumber');
+    if(!orderCounter){
+        const newCounter = new Counter({
+            _id: 'orderNumber',
+            seq: 1000
+        });
+        await newCounter.save();
+        console.log('Order Counter initialized to 1000.');
+    }else{
+        console.log('Counter already exists:', orderCounter);
     }
 }
