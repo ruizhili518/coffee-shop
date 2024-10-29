@@ -107,7 +107,7 @@ export default function Checkout() {
                         </div>
                         {user.role !== 'ROLE_VISITOR' && (
                             <div>
-                                <Label htmlFor="points">Points to Redeem  (Max:{Math.min(subtotal/redeemRatio, user.points).toFixed(0)})</Label>
+                                <Label htmlFor="points">Points to Redeem  (1 points = {redeemRatio} $ ; Max:{Math.min(subtotal/redeemRatio, user.points).toFixed(0)} )</Label>
                                 <Input
                                     id="points"
                                     type="number"
