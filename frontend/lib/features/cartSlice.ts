@@ -89,10 +89,16 @@ export const cart = createSlice({
             state.value = state.value.filter(item => item.time !== action.payload);
             state.lastUpdated = Date.now();
             saveState(state);
+        },
+        initialCart: (state) => {
+            state.value = [];
+            state.lastUpdated = Date.now();
+            saveState(state);
         }
     }
 });
 
-export const {addItem, addItemQuantity, minusItemQuantity, deleteItem} = cart.actions;
+export const {addItem, addItemQuantity, minusItemQuantity, deleteItem,initialCart
+} = cart.actions;
 
 export default cart.reducer;

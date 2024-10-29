@@ -9,25 +9,35 @@ import {AppDispatch, useAppSelector} from "@/lib/store";
 import { useSearchParams } from 'next/navigation';
 import {useEffect, useState} from "react";
 import {checkSuccess} from "@/api/api";
+import {initialCart} from "@/lib/features/cartSlice";
+import LoadingPage from "@/components/LoadingPage";
 
-const Page = ({ orderNumber = "123456", customerName = "John Doe" }) => {
+const Page = () => {
     const router = useRouter();
     const dispatch = useDispatch<AppDispatch>();
     const searchParams = useSearchParams();
     const sessionId  = searchParams.get('session_id');
     const cart = useAppSelector((state) => state.cartReducer.value);
     const [isLoading, setIsLoading] = useState(true);
+    const [orderNumber, setOrderNumber] = useState("");
+    const [customerName, setCustomerName] = useState("");
 
     const checkoutSuccess = async () => {
         const data = {sessionId,cart};
         const res = await checkSuccess(data);
-        console.log(res);
+        setOrderNumber(res.data.orderNumber);
+        setCustomerName(res.data.customerName);
     }
 
     useEffect(() => {
         checkoutSuccess();
+        dispatch(initialCart());
+        setIsLoading(false);
     }, []);
 
+    if(isLoading){
+        return <LoadingPage/>
+    }
     return (
         <div className="flex items-center justify-center p-8">
             <Card className="w-full max-w-md">
@@ -48,7 +58,9 @@ const Page = ({ orderNumber = "123456", customerName = "John Doe" }) => {
                         <p className="text-lg font-semibold">{orderNumber}</p>
                     </div>
                     <div className="space-y-2 w-full">
-                        <Button className="w-full">View Order Details</Button>
+                        {
+                            <Button className="w-full">View Order History</Button>
+                        }
                         <Button variant="outline" className="w-full" onClick={() => {router.push('/menu')}}>
                             Continue Shopping
                         </Button>

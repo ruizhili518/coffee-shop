@@ -1,6 +1,8 @@
 import {stripe} from "../lib/stripe.js";
 import dotenv from "dotenv";
 import Order from "../models/order.model.js";
+import Counter from "../models/counter.model.js";
+import Points from "../models/points.model.js";
 
 dotenv.config();
 
@@ -72,31 +74,43 @@ export const checkSuccess = async (req,res) => {
     try {
         const {sessionId , cart} = req.body;
         const session = await stripe.checkout.sessions.retrieve(sessionId);
-        if(session.payment_status === "paid"){
-            const items = JSON.parse(cart);
-            // Get the next userId in the sequence.
+        const existOrder = await Order.findOne({sessionId});
+        if(session.payment_status === "paid" && !existOrder){
+            // Get the next orderNumber in the sequence.
             const orderNumber = await getNextSequenceValue('orderNumber');
-            const getPointsRatio = Points.findOne({name:"get"});
+            const getPointsRatio = await Points.findOne({name:"get"});
             const newOrder = new Order({
-                orderStatus: "process",
+                orderStatus: "processing",
                 customerName: session.metadata.customerName,
                 userId: session.metadata.userId,
                 memo:session.metadata.memo,
                 totalPrice: session.metadata.totalPrice,
                 pointsRedeem: session.metadata.pointsRedeem,
-                pointsGet: (session.metadata.totalPrice - session.metadata.appliedDiscount) * getPointsRatio,
-                items,
+                pointsGet: (session.metadata.totalPrice - session.metadata.appliedDiscount) * getPointsRatio.ratio,
+                items:cart,
                 orderNumber,
+                sessionId
             })
             await newOrder.save();
-        res.status(200).json({
+            res.status(200).json({
                 success: true,
                 message: "Payment successful, order created.",
                 orderNumber: newOrder.orderNumber,
                 customerName: newOrder.customerName
             })
+        }else if(existOrder){
+            res.status(201).json({
+                message: "Order already exist.",
+                orderNumber: existOrder.orderNumber,
+                customerName: existOrder.customerName
+            })
+        }else{
+            res.status(400).json({
+                message: "Something wrong with the payment or order already exist."
+            })
         }
     }catch (e) {
-        res.status(500).json({message: "Something wrong with the server. Please try later.",error:e.message})
+        res.status(500).json({message: "Something wrong with the server. Please try later.",error:e.message});
+        console.log(e);
     }
 }

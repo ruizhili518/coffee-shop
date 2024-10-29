@@ -1,12 +1,17 @@
 import mongoose from "mongoose";
 
 const orderSchema = new mongoose.Schema({
+    sessionId:{
+        type: String,
+        required: [true,'Session Id is required.']
+    },
     orderNumber: {
         type: Number,
         required: [true,'Order number is required.']
     },
     orderStatus: {
-        type: String
+        type: String,
+        enum: ['processing', 'completed']
     },
     customerName: {
         type: String,
@@ -14,7 +19,8 @@ const orderSchema = new mongoose.Schema({
     },
     userId: {
         type: Number,
-        unique: true,
+        required: [true, 'User ID is required.'],
+        index: true
     },
     memo: {
         type: String,
@@ -69,6 +75,8 @@ const orderSchema = new mongoose.Schema({
 },{
     timestamps: true
 });
+
+orderSchema.index({ userId: 1, createdAt: -1 });
 
 const Order = mongoose.model("Order", orderSchema);
 export default Order;
