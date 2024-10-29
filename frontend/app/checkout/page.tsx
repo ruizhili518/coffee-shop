@@ -12,7 +12,7 @@ import {CldImage} from "next-cloudinary";
 import Image from "next/image";
 import {useDispatch} from "react-redux";
 import {addItemQuantity, deleteItem, minusItemQuantity} from "@/lib/features/cartSlice";
-import {getRedeemPointRatio} from "@/api/api";
+import {createCheckout, getRedeemPointRatio} from "@/api/api";
 import {loadStripe} from "@stripe/stripe-js/";
 
 const stripePromise = loadStripe("pk_test_51QDDjRCTN34WYNT4JF7d2Z84GBtt7jgtrO5uyJW9dOxrlmB0neqmUhtR4b5kiL5WfnhmHbE8ivT3uT6REFwpD5ES00vLVY7PzK");
@@ -64,7 +64,23 @@ export default function Checkout() {
 
     const payHandler = async () => {
         const stripe = await stripePromise;
-        console.log(stripe);
+        const data = {
+            cart,
+            totalPrice,
+            customerName,
+            user,
+            memo,
+            pointsToRedeem,
+            discount: pointsToRedeem * redeemRatio
+        }
+        const res = await createCheckout(data);
+        const session = res.data;
+        const result = await stripe?.redirectToCheckout({
+            sessionId: session.id
+        })
+        if(result?.error){
+            console.error('Error:',result?.error);
+        }
     }
 
     if(isLoading) return <LoadingPage/>

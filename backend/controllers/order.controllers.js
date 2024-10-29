@@ -16,8 +16,8 @@ async function getNextSequenceValue(sequenceName){
 
 export const createCheckoutSession = async (req, res) => {
     try {
-        const { cart,totalPrice,customerName,user,memo,pointsRedeem } = req.body;
-        if(!Array.isArray(items) || items.length === 0){
+        const { cart,totalPrice,customerName,user,memo,pointsToRedeem, discount } = req.body;
+        if(!Array.isArray(cart) || cart.length === 0){
             return res.status(400).json({error: "Empty cart."});
         }
         const lineItems = cart.map(item => {
@@ -30,25 +30,38 @@ export const createCheckoutSession = async (req, res) => {
                         images: [item.product.image]
                     },
                     unit_amount:amount
-                }
+                },
+                quantity: 1,
             }
         });
+        let couponId;
+        if(discount > 0){
+            const coupon = await stripe.coupons.create({
+                amount_off : Math.round(discount * 100), //Covert to cents
+                currency: 'CAD',
+                duration: 'once',
+                name:`Discount:${customerName}-${Date.now()}`
+            });
+            couponId = coupon.id;
+        }
+
         const session = await stripe.checkout.sessions.create({
             payment_method_types:['card'],
             line_items: lineItems,
             mode: "payment",
             success_url: `${process.env.FRONTEND_URL}/purchase-success?session_id={CHECKOUT_SESSION_ID}`,
             cancel_url:`${process.env.FRONTEND_URL}/purchase-cancel`,
+            discounts:discount > 0 ? [{coupon:couponId}]: [],
             metadata:{
                 userId: user.userId,
                 customerName,
                 memo,
-                pointsRedeem,
-                totalPrice,
-                items:JSON.stringify(cart)
+                pointsToRedeem,
+                totalPrice: totalPrice,
+                appliedDiscount: discount
             }
         });
-        res.status(200).json({id: session.id, totalPrice})
+        res.status(200).json({id: session.id, totalPrice, discount})
     }catch (e) {
         res.status(500).json({error: e.message})
         console.log(e);
@@ -57,10 +70,10 @@ export const createCheckoutSession = async (req, res) => {
 
 export const checkSuccess = async (req,res) => {
     try {
-        const {sessionId} = req.body;
+        const {sessionId , cart} = req.body;
         const session = await stripe.checkout.sessions.retrieve(sessionId);
         if(session.payment_status === "paid"){
-            const items = JSON.parse(session.metadata.items);
+            const items = JSON.parse(cart);
             // Get the next userId in the sequence.
             const orderNumber = await getNextSequenceValue('orderNumber');
             const getPointsRatio = Points.findOne({name:"get"});
@@ -71,15 +84,16 @@ export const checkSuccess = async (req,res) => {
                 memo:session.metadata.memo,
                 totalPrice: session.metadata.totalPrice,
                 pointsRedeem: session.metadata.pointsRedeem,
-                pointsGet: session.metadata.totalPrice * getPointsRatio,
+                pointsGet: (session.metadata.totalPrice - session.metadata.appliedDiscount) * getPointsRatio,
                 items,
                 orderNumber,
             })
             await newOrder.save();
-            res.status(200).json({
+        res.status(200).json({
                 success: true,
                 message: "Payment successful, order created.",
-                orderNumber: newOrder.orderNumber
+                orderNumber: newOrder.orderNumber,
+                customerName: newOrder.customerName
             })
         }
     }catch (e) {

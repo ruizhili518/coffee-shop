@@ -103,4 +103,12 @@ export const createCheckout = (value) => {
         method: 'POST',
         data: value
     })
-}
+};
+
+export const checkSuccess = (value) => {
+    return http.request({
+        url: '/order/check-success',
+        method: 'POST',
+        data: value
+    })
+};
