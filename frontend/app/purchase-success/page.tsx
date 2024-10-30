@@ -12,7 +12,7 @@ import {checkSuccess} from "@/api/api";
 import {initialCart} from "@/lib/features/cartSlice";
 import LoadingPage from "@/components/LoadingPage";
 
-const Page = () => {
+const PurchaseSuccessPage = () => {
     const router = useRouter();
     const dispatch = useDispatch<AppDispatch>();
     const searchParams = useSearchParams();
@@ -71,4 +71,4 @@ const Page = () => {
     );
 };
 
-export default Page;
+export default PurchaseSuccessPage;
