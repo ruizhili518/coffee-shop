@@ -112,3 +112,11 @@ export const checkSuccess = (value) => {
         data: value
     })
 };
+
+export const getOrders = (value) => {
+    return http.request({
+        url: '/order/get-orders',
+        method: 'POST',
+        data: value
+    })
+}

@@ -1,48 +1,79 @@
 'use client'
 
-import { useState } from 'react'
+import {useEffect, useState} from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ChevronDown, ChevronUp, MoreHorizontal, Plus } from 'lucide-react'
-import Image from 'next/image'
+import {useAppSelector} from "@/lib/store";
+import {getOrders} from "@/api/api";
+import LoadingPage from "@/components/LoadingPage";
 
-// Mock data for demonstration
-const orders = [
-    {
-        id: 'ORD-001',
-        total: 150.00,
-        customer: 'John Doe',
-        orderTime: '2023-10-25 10:30',
-        status: 'processing',
-        image: '/placeholder.svg',
-        customization: 'Extra large',
-        memo: 'Fragile items'
-    },
-    {
-        id: 'ORD-002',
-        total: 75.50,
-        customer: 'Jane Smith',
-        orderTime: '2023-10-24 14:15',
-        status: 'completed',
-        image: '/placeholder.svg',
-        customization: 'Gift wrap',
-        memo: 'Birthday present'
-    },
-    {
-        id: 'ORD-003',
-        total: 200.00,
-        customer: 'Bob Johnson',
-        orderTime: '2023-10-26 09:45',
-        status: 'processing',
-        image: '/placeholder.svg',
-        customization: 'Express shipping',
-        memo: 'Urgent delivery'
-    },
-]
+// const orders = [
+//     {
+//         createdAt: "2024-10-29T21:57:50.739Z",
+//         customerName: "John Doe",
+//         items: [{ name: "Product 1", quantity: 2, price: 2.99 }],
+//         memo: "Handle with care",
+//         orderNumber: 1065,
+//         orderStatus: "processing",
+//         pointsGet: 149.25,
+//         sessionId: "cs_test_a1N6YybcijjgyvhIQMnlQ2bBD055Ik81F1CmXs1pET7JyGoqtWVxKBygCE",
+//         totalPrice: 5.97,
+//         updatedAt: "2024-10-29T21:57:50.739Z",
+//         userId: 1012,
+//         __v: 0,
+//         _id: "67215a5e0daead3489ffe442"
+//     },
+//     {
+//         createdAt: "2024-10-28T15:30:00.000Z",
+//         customerName: "Jane Smith",
+//         items: [{ name: "Product 2", quantity: 1, price: 10.99 }],
+//         memo: "Gift wrap requested",
+//         orderNumber: 1066,
+//         orderStatus: "completed",
+//         pointsGet: 274.75,
+//         sessionId: "cs_test_b2M7ZzcdjkkgzwiJRNnmR3cCE166Jl92G2DnYt2qFU8KzHprwXWyLCzhDF",
+//         totalPrice: 10.99,
+//         updatedAt: "2024-10-28T16:45:00.000Z",
+//         userId: 1013,
+//         __v: 0,
+//         _id: "67215a5e0daead3489ffe443"
+//     },
+// ]
 
-export default function OrderList() {
+export default function OrderHistory() {
+    const userInformation = useAppSelector((state) => state.authReducer.value);
+    const [isLoading, setIsLoading] = useState(true);
+    const [orders, setOrders] = useState([{
+        createdAt: "",
+        customerName: "",
+        items: [{}],
+        memo: "",
+        orderNumber: null,
+        orderStatus: "",
+        pointsGet: null,
+        sessionId: "",
+        totalPrice: null,
+        updatedAt: "",
+        userId: null,
+        __v: null,
+        _id: ""
+    }]);
+
+    const getAllOrders = async () => {
+        const info = {role: userInformation.role , userId: userInformation.userId};
+        const res = await getOrders(info);
+        const allOrders = res.data.orders;
+        setOrders(allOrders);
+    }
+
+    useEffect(() => {
+        getAllOrders();
+        setIsLoading(false);
+    }, [userInformation]);
+
     const [activeTab, setActiveTab] = useState('all')
     const [startDate, setStartDate] = useState('')
     const [endDate, setEndDate] = useState('')
@@ -54,12 +85,15 @@ export default function OrderList() {
         )
     }
 
-    const filteredOrders = orders.filter(order => {
-        if (activeTab !== 'all' && order.status !== activeTab) return false
-        if (startDate && new Date(order.orderTime) < new Date(startDate)) return false
-        if (endDate && new Date(order.orderTime) > new Date(endDate)) return false
+    const filteredOrders = orders?.filter(order => {
+        if (activeTab !== 'all' && order.orderStatus !== activeTab) return false
+        if (startDate && new Date(order.createdAt) < new Date(startDate)) return false
+        if (endDate && new Date(order.createdAt) > new Date(endDate)) return false
         return true
     })
+
+    if(isLoading)
+        return <LoadingPage/>
 
     return (
         <div className="container mx-auto p-6">
@@ -123,39 +157,32 @@ export default function OrderList() {
                     <table className="w-full">
                         <thead>
                         <tr className="border-t">
-                            <th className="text-left p-4 font-medium">Order Details</th>
+                            <th className="text-left p-4 font-medium">Order Number</th>
                             <th className="text-left p-4 font-medium">Total Price</th>
                             <th className="text-left p-4 font-medium">Customer Name</th>
-                            <th className="text-left p-4 font-medium">Order Time</th>
+                            <th className="text-left p-4 font-medium">Order Date</th>
                             <th className="text-left p-4 font-medium">Status</th>
                             <th className="text-left p-4 font-medium"></th>
                         </tr>
                         </thead>
                         <tbody>
-                        {filteredOrders.map(order => (
+                        {filteredOrders?.map(order => (
                             <>
                                 <tr
-                                    key={order.id}
+                                    key={order._id}
                                     className="border-t hover:bg-muted/50 cursor-pointer"
-                                    onClick={() => toggleRow(order.id)}
+                                    onClick={() => toggleRow(order._id)}
                                 >
                                     <td className="p-4">
                                         <div className="flex items-center gap-3">
-                                            <Image
-                                                src={order.image}
-                                                alt="Order thumbnail"
-                                                width={40}
-                                                height={40}
-                                                className="rounded-md"
-                                            />
-                                            <span className="font-medium">{order.id}</span>
+                                            <span className="font-medium">#{order.orderNumber}</span>
                                         </div>
                                     </td>
-                                    <td className="p-4">${order.total.toFixed(2)}</td>
-                                    <td className="p-4">{order.customer}</td>
-                                    <td className="p-4">{order.orderTime}</td>
+                                    <td className="p-4">${order.totalPrice}</td>
+                                    <td className="p-4">{order.customerName}</td>
+                                    <td className="p-4">{new Date(order.createdAt).toLocaleString()}</td>
                                     <td className="p-4">
-                                        <Select defaultValue={order.status}>
+                                        <Select defaultValue={order.orderStatus}>
                                             <SelectTrigger className="w-[130px]">
                                                 <SelectValue />
                                             </SelectTrigger>
@@ -167,23 +194,25 @@ export default function OrderList() {
                                     </td>
                                     <td className="p-4">
                                         <div className="flex items-center gap-2">
-                                            <Button variant="ghost" size="icon">
-                                                <MoreHorizontal className="h-4 w-4" />
-                                            </Button>
-                                            {expandedRows.includes(order.id) ?
+                                            {expandedRows.includes(order._id) ?
                                                 <ChevronUp className="h-4 w-4" /> :
                                                 <ChevronDown className="h-4 w-4" />
                                             }
                                         </div>
                                     </td>
                                 </tr>
-                                {expandedRows.includes(order.id) && (
+                                {expandedRows.includes(order._id) && (
                                     <tr className="bg-muted/50">
-                                        <td colSpan={6} className="p-4">
+                                        <td colSpan={7} className="p-4">
                                             <div className="grid grid-cols-2 gap-4">
                                                 <div>
-                                                    <Label>Customization</Label>
-                                                    <p className="mt-1">{order.customization}</p>
+                                                    <Label>Items</Label>
+                                                    {order.items.map(item => {
+                                                        return (<ul className="mt-1 space-y-1" key={item.product._id}>
+                                                            {item.product.name}
+                                                        </ul>)
+                                                    })
+                                                    }
                                                 </div>
                                                 <div>
                                                     <Label>Memo</Label>

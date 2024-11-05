@@ -75,7 +75,7 @@ const Navbar = () => {
         [ "/" , "Home"], [ "/menu", "Menu"] , [ "/" , "Order History" ]
     ];
     const superAdminMenu = [
-        [ "/" , "Home"], [ "/menu", "Menu"] , [ "/" , "Order History" ], [ "/product" , "Manage Product" ] , [ "/store", "Manage Store"]
+        [ "/" , "Home"], [ "/menu", "Menu"] , [ "/order-history" , "Order History" ], [ "/product" , "Manage Product" ] , [ "/store", "Manage Store"]
     ];
 
     const [menu, setMenu] = useState(userMenu);

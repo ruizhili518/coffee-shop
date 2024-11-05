@@ -22,6 +22,8 @@ const PurchaseSuccessPage = () => {
     const [orderNumber, setOrderNumber] = useState("");
     const [customerName, setCustomerName] = useState("");
 
+    const userInformation = useAppSelector((state) => state.authReducer.value);
+
     const checkoutSuccess = async () => {
         const data = {sessionId,cart};
         const res = await checkSuccess(data);
@@ -52,14 +54,15 @@ const PurchaseSuccessPage = () => {
                     </div>
                     <p className="text-gray-600 mb-6">
                         Thank you for your order, {customerName}. We are processing it now.
+                        Please keep your order number in mind, we may ask you for your number.
                     </p>
                     <div className="bg-gray-50 rounded-lg p-4 mb-6 w-full">
                         <p className="text-sm text-gray-600 mb-1">Order Number</p>
                         <p className="text-lg font-semibold">{orderNumber}</p>
                     </div>
                     <div className="space-y-2 w-full">
-                        {
-                            <Button className="w-full">View Order History</Button>
+                        { userInformation.role !== 'ROLE_VISITOR' &&
+                            <Button className="w-full" onClick={() => {router.push('/order-history')}}>View Order History</Button>
                         }
                         <Button variant="outline" className="w-full" onClick={() => {router.push('/menu')}}>
                             Continue Shopping

@@ -45,6 +45,7 @@ const Cart = () => {
     };
     const addQuantityHandler = (time: number) => {
         dispatch(addItemQuantity(time));
+        console.log(cart);
     };
     const minusQuantityHandler = (time: number) => {
         dispatch(minusItemQuantity(time));

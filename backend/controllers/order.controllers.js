@@ -69,7 +69,6 @@ export const createCheckoutSession = async (req, res) => {
         console.log(e);
     }
 }
-
 export const checkSuccess = async (req,res) => {
     try {
         const {sessionId , cart} = req.body;
@@ -112,5 +111,22 @@ export const checkSuccess = async (req,res) => {
     }catch (e) {
         res.status(500).json({message: "Something wrong with the server. Please try later.",error:e.message});
         console.log(e);
+    }
+}
+export const getOrderHistory = async (req,res) => {
+    try {
+        const {role, userId} = req.body;
+        if(role === "ROLE_SUPERADMIN" || role === "ROLE_ADMIN"){
+            const orders = await Order.find({});
+            res.status(200).json({orders, message: "All the orders are successfully returned to admin."})
+        }else if(role === "ROLE_USER"){
+            const orders = await Order.find({userId});
+            res.status(200).json({orders, message: "All the orders of this user are returned."});
+        }else{
+            res.status(201).json({message: "Cannot trace order history of a guest."})
+        }
+    }catch (e){
+        console.log(e);
+        res.status(500).json({message: "Something wrong with the server."})
     }
 }
