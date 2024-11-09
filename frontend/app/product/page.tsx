@@ -55,46 +55,10 @@ import LoadingPage from "@/components/LoadingPage";
 const ProductPage = () => {
     const router = useRouter();
     // Initialize state to manipulate products data.
-    const [products, setProducts] = useState([{
-        name:"",
-        status:"",
-        baseprice:0,
-        description:"",
-        category:"",
-        image:"",
-        buy:0,
-        getFree:0,
-        customizations:[{cusCategory: "", cusName: "", extraprice: 0}],
-        _id:"",
-        updatedAt: ""
-    }]);
+    const [products, setProducts] = useState<Product[]>([]);
     // Group products.
-    const [ activeProducts, setActiveProducts ] = useState([{
-        name:"",
-        status:"",
-        baseprice:0,
-        description:"",
-        category:"",
-        image:"",
-        buy:0,
-        getFree:0,
-        customizations:[{cusCategory: "", cusName: "", extraprice: 0}],
-        _id:"",
-        updatedAt: ""
-    }]);
-    const [ inactiveProducts, setInactiveProducts ] = useState([{
-        name:"",
-        status:"",
-        baseprice:0,
-        description:"",
-        category:"",
-        image:"",
-        buy:0,
-        getFree:0,
-        customizations:[{cusCategory: "", cusName: "", extraprice: 0}],
-        _id:"",
-        updatedAt: ""
-    }]);
+    const [ activeProducts, setActiveProducts ] = useState<Product[]>([]);
+    const [ inactiveProducts, setInactiveProducts ] = useState<Product[]>([]);
     // State to show if loading.
     const [loading , setLoading] = useState(true);
 
@@ -163,7 +127,7 @@ const ProductPage = () => {
                             </div>
                         </div>
                         <TabsContent value="all">
-                            <Card x-chunk="dashboard-06-chunk-0">
+                            <Card>
                                 <CardHeader>
                                     <CardTitle>Products</CardTitle>
                                     <CardDescription>
@@ -310,7 +274,7 @@ const ProductPage = () => {
                             </Card>
                         </TabsContent>
                         <TabsContent value="active">
-                            <Card x-chunk="dashboard-06-chunk-0">
+                            <Card>
                                 <CardHeader>
                                     <CardTitle>Products</CardTitle>
                                     <CardDescription>

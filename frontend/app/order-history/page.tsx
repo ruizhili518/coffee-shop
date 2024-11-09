@@ -1,233 +1,435 @@
 'use client'
 
-import {useEffect, useState} from 'react'
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ChevronDown, ChevronUp, MoreHorizontal, Plus } from 'lucide-react'
+import React, {useEffect, useState} from 'react';
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {useAppSelector} from "@/lib/store";
-import {getOrders} from "@/api/api";
+import {changeOrderStatus, getOrders} from "@/api/api";
 import LoadingPage from "@/components/LoadingPage";
-
-// const orders = [
-//     {
-//         createdAt: "2024-10-29T21:57:50.739Z",
-//         customerName: "John Doe",
-//         items: [{ name: "Product 1", quantity: 2, price: 2.99 }],
-//         memo: "Handle with care",
-//         orderNumber: 1065,
-//         orderStatus: "processing",
-//         pointsGet: 149.25,
-//         sessionId: "cs_test_a1N6YybcijjgyvhIQMnlQ2bBD055Ik81F1CmXs1pET7JyGoqtWVxKBygCE",
-//         totalPrice: 5.97,
-//         updatedAt: "2024-10-29T21:57:50.739Z",
-//         userId: 1012,
-//         __v: 0,
-//         _id: "67215a5e0daead3489ffe442"
-//     },
-//     {
-//         createdAt: "2024-10-28T15:30:00.000Z",
-//         customerName: "Jane Smith",
-//         items: [{ name: "Product 2", quantity: 1, price: 10.99 }],
-//         memo: "Gift wrap requested",
-//         orderNumber: 1066,
-//         orderStatus: "completed",
-//         pointsGet: 274.75,
-//         sessionId: "cs_test_b2M7ZzcdjkkgzwiJRNnmR3cCE166Jl92G2DnYt2qFU8KzHprwXWyLCzhDF",
-//         totalPrice: 10.99,
-//         updatedAt: "2024-10-28T16:45:00.000Z",
-//         userId: 1013,
-//         __v: 0,
-//         _id: "67215a5e0daead3489ffe443"
-//     },
-// ]
+import {Order} from "@/lib/types";
+import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
+import {Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle} from "@/components/ui/card";
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
+import { toast } from "sonner";
 
 export default function OrderHistory() {
     const userInformation = useAppSelector((state) => state.authReducer.value);
     const [isLoading, setIsLoading] = useState(true);
-    const [orders, setOrders] = useState([{
-        createdAt: "",
-        customerName: "",
-        items: [{}],
-        memo: "",
-        orderNumber: null,
-        orderStatus: "",
-        pointsGet: null,
-        sessionId: "",
-        totalPrice: null,
-        updatedAt: "",
-        userId: null,
-        __v: null,
-        _id: ""
-    }]);
-
-    const getAllOrders = async () => {
-        const info = {role: userInformation.role , userId: userInformation.userId};
-        const res = await getOrders(info);
-        const allOrders = res.data.orders;
-        setOrders(allOrders);
-    }
-
-    useEffect(() => {
-        getAllOrders();
-        setIsLoading(false);
-    }, [userInformation]);
-
+    const [orders, setOrders] = useState<Order[]>([]);
+    const [proOrder, setProOrder] = useState<Order[]>([]);
+    const [comOrder, setComOrder] = useState<Order[]>([]);
     const [activeTab, setActiveTab] = useState('all')
     const [startDate, setStartDate] = useState('')
     const [endDate, setEndDate] = useState('')
     const [expandedRows, setExpandedRows] = useState<string[]>([])
 
+    useEffect(() => {
+        const getAllOrders = async () => {
+            const info = {role: userInformation.role , userId: userInformation.userId};
+            const res = await getOrders(info);
+            let allOrders = res.data.orders;
+            allOrders = allOrders?.sort((a: Order,b: Order) => b.orderNumber - a.orderNumber);
+            setOrders(allOrders);
+            setProOrder(allOrders?.filter((order: Order) => order.orderStatus === "processing"));
+            setComOrder(allOrders?.filter((order: Order) => order.orderStatus === "completed"))
+        }
+        getAllOrders();
+        setIsLoading(false);
+    }, [userInformation , isLoading]);
+
+
+
     const toggleRow = (orderId: string) => {
         setExpandedRows(prev =>
             prev.includes(orderId) ? prev.filter(id => id !== orderId) : [...prev, orderId]
         )
-    }
+    };
 
     const filteredOrders = orders?.filter(order => {
         if (activeTab !== 'all' && order.orderStatus !== activeTab) return false
         if (startDate && new Date(order.createdAt) < new Date(startDate)) return false
-        if (endDate && new Date(order.createdAt) > new Date(endDate)) return false
-        return true
-    })
+        return !(endDate && new Date(order.createdAt) > new Date(endDate));
+    });
+
+    const handleStatusChange = async (id: string, newStatus: string) => {
+        const orderData = {id, newStatus};
+        const res = await changeOrderStatus(orderData);
+        return res.status;
+    }
 
     if(isLoading)
         return <LoadingPage/>
-
     return (
-        <div className="container mx-auto p-6">
-            <div className="flex justify-between items-center mb-6">
-                <div className="space-x-1">
-                    <Button
-                        variant={activeTab === 'all' ? "secondary" : "ghost"}
-                        onClick={() => setActiveTab('all')}
-                    >
-                        All
-                    </Button>
-                    <Button
-                        variant={activeTab === 'processing' ? "secondary" : "ghost"}
-                        onClick={() => setActiveTab('processing')}
-                    >
-                        Processing
-                    </Button>
-                    <Button
-                        variant={activeTab === 'completed' ? "secondary" : "ghost"}
-                        onClick={() => setActiveTab('completed')}
-                    >
-                        Completed
-                    </Button>
-                </div>
-                <Button>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Add Order
-                </Button>
+        <div className="flex min-h-screen flex-col items-center">
+            <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14 w-full lg:px-14">
+                <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+                    <Tabs defaultValue="all" onValueChange={setActiveTab}>
+                        <div className="flex items-center justify-between">
+                            <TabsList>
+                                <TabsTrigger value="all">All</TabsTrigger>
+                                <TabsTrigger value="processing">Processing</TabsTrigger>
+                                <TabsTrigger value="completed">Completed</TabsTrigger>
+                            </TabsList>
+                            <div className="flex gap-4 mb-4">
+                                <div>
+                                    <Label htmlFor="startDate">Start Date</Label>
+                                    <Input
+                                        type="date"
+                                        id="startDate"
+                                        value={startDate}
+                                        onChange={(e) => setStartDate(e.target.value)}
+                                    />
+                                </div>
+                                <div>
+                                    <Label htmlFor="endDate">End Date</Label>
+                                    <Input
+                                        type="date"
+                                        id="endDate"
+                                        value={endDate}
+                                        onChange={(e) => setEndDate(e.target.value)}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                        <TabsContent value="all">
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Orders</CardTitle>
+                                    <CardDescription>
+                                        Manage your orders.
+                                    </CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                    <Table>
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead className="w-[100px]">Order Number</TableHead>
+                                                <TableHead>Total Price</TableHead>
+                                                <TableHead>Customer Name</TableHead>
+                                                <TableHead>Order Date</TableHead>
+                                                <TableHead>Status</TableHead>
+                                                <TableHead>Get Points</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {filteredOrders?.map((order) => (
+                                                <>
+                                                    <TableRow key={order._id} className="cursor-pointer" onClick={() => toggleRow(order._id)}>
+                                                        <TableCell className="font-medium">#{order.orderNumber}</TableCell>
+                                                        <TableCell>${order.totalPrice.toFixed(2)}</TableCell>
+                                                        <TableCell>{order.customerName}</TableCell>
+                                                        <TableCell>{new Date(order.createdAt).toLocaleString()}</TableCell>
+                                                        <TableCell>
+                                                            {userInformation.role === "ROLE_SUPERADMIN" && <Select
+                                                                defaultValue={order.orderStatus}
+                                                                onValueChange={(value) => {
+                                                                    handleStatusChange(order._id, value);
+                                                                    toast.success(`Order #${order.orderNumber} status has been changed to ${value}.`);
+                                                                }}
+                                                            >
+                                                                <SelectTrigger className="w-[130px]">
+                                                                    <SelectValue placeholder="Select status" />
+                                                                </SelectTrigger>
+                                                                <SelectContent>
+                                                                    <SelectItem value="processing">Processing</SelectItem>
+                                                                    <SelectItem value="completed">Completed</SelectItem>
+                                                                </SelectContent>
+                                                            </Select>}
+                                                            {userInformation.role === "ROLE_USER" && order.orderStatus.charAt(0).toUpperCase()+order.orderStatus.slice(1)}
+                                                        </TableCell>
+                                                        <TableCell>{order.pointsGet.toFixed(2)}</TableCell>
+                                                    </TableRow>
+                                                    {expandedRows.includes(order._id) && (
+                                                        <TableRow>
+                                                            <TableCell colSpan={7}>
+                                                                <div className="p-4 bg-muted/50">
+                                                                    <h4 className="font-semibold mb-2">Order Details</h4>
+                                                                    <div className="grid grid-cols-2 gap-20">
+                                                                        <div>
+                                                                            <h5 className="font-semibold">Items</h5>
+                                                                                {order.items.map((item, index) => (
+                                                                                    <div key={index} className="flex flex-col">
+                                                                                        <div className="flex w-full justify-between">
+                                                                                            <div>
+                                                                                            {item.product.name} * {item.amount}
+                                                                                            </div>
+                                                                                            <div>Price: ${item.price.toFixed(2)}</div>
+                                                                                        </div>
+
+                                                                                        {item.product.customizations?.map(cus => {
+                                                                                            if (cus.cusName === item.size) {
+                                                                                                return (
+                                                                                                    <div key={item.size+item.sizePrice}>
+                                                                                                        - {item.size}
+                                                                                                    </div>
+                                                                                                )
+                                                                                            }
+                                                                                            if (cus.cusName === item.ice) {
+                                                                                                return (
+                                                                                                    <div key={item.ice+item.icePrice}>
+                                                                                                        - {item.ice}
+                                                                                                    </div>
+                                                                                                )
+                                                                                            }
+                                                                                            if (cus.cusName === item.milk) {
+                                                                                                return (
+                                                                                                    <div key={item.milk+item.milkPrice}>
+                                                                                                        - {item.milk}
+                                                                                                    </div>
+                                                                                                )
+                                                                                            }
+                                                                                        })}
+                                                                                    </div>
+                                                                                ))}
+                                                                        </div>
+                                                                        <div>
+                                                                            <h5 className="font-semibold">Memo</h5>
+                                                                            <p>{order.memo}</p>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    )}
+                                                </>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                </CardContent>
+                                <CardFooter>
+                                    <div className="text-xs text-muted-foreground">
+                                        Showing <strong>{filteredOrders?.length}</strong> orders
+                                    </div>
+                                </CardFooter>
+                            </Card>
+                        </TabsContent>
+                        <TabsContent value="processing">
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Orders</CardTitle>
+                                    <CardDescription>
+                                        Manage your orders.
+                                    </CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                    <Table>
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead className="w-[100px]">Order Number</TableHead>
+                                                <TableHead>Total Price</TableHead>
+                                                <TableHead>Customer Name</TableHead>
+                                                <TableHead>Order Date</TableHead>
+                                                <TableHead>Status</TableHead>
+                                                <TableHead>Get Points</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {filteredOrders?.map((order) => (
+                                                <>
+                                                    <TableRow key={order._id} className="cursor-pointer" onClick={() => toggleRow(order._id)}>
+                                                        <TableCell className="font-medium">#{order.orderNumber}</TableCell>
+                                                        <TableCell>${order.totalPrice.toFixed(2)}</TableCell>
+                                                        <TableCell>{order.customerName}</TableCell>
+                                                        <TableCell>{new Date(order.createdAt).toLocaleString()}</TableCell>
+                                                        <TableCell>
+                                                            {userInformation.role === "ROLE_SUPERADMIN" && <Select
+                                                                defaultValue={order.orderStatus}
+                                                                onValueChange={(value) => {
+                                                                    handleStatusChange(order._id, value);
+                                                                    toast.success(`Order #${order.orderNumber} status has been changed to ${value}.`);
+                                                                }}
+                                                            >
+                                                                <SelectTrigger className="w-[130px]">
+                                                                    <SelectValue placeholder="Select status" />
+                                                                </SelectTrigger>
+                                                                <SelectContent>
+                                                                    <SelectItem value="processing">Processing</SelectItem>
+                                                                    <SelectItem value="completed">Completed</SelectItem>
+                                                                </SelectContent>
+                                                            </Select>}
+                                                            {userInformation.role === "ROLE_USER" && order.orderStatus.charAt(0).toUpperCase()+order.orderStatus.slice(1)}
+                                                        </TableCell>
+                                                        <TableCell>{order.pointsGet.toFixed(2)}</TableCell>
+                                                    </TableRow>
+                                                    {expandedRows.includes(order._id) && (
+                                                        <TableRow>
+                                                            <TableCell colSpan={7}>
+                                                                <div className="p-4 bg-muted/50">
+                                                                    <h4 className="font-semibold mb-2">Order Details</h4>
+                                                                    <div className="grid grid-cols-2 gap-20">
+                                                                        <div>
+                                                                            <h5 className="font-semibold">Items</h5>
+                                                                            {order.items.map((item, index) => (
+                                                                                <div key={index} className="flex flex-col">
+                                                                                    <div className="flex w-full justify-between">
+                                                                                        <div>
+                                                                                            {item.product.name} * {item.amount}
+                                                                                        </div>
+                                                                                        <div>Price: ${item.price.toFixed(2)}</div>
+                                                                                    </div>
+
+                                                                                    {item.product.customizations?.map(cus => {
+                                                                                        if (cus.cusName === item.size) {
+                                                                                            return (
+                                                                                                <div key={item.size+item.sizePrice}>
+                                                                                                    - {item.size}
+                                                                                                </div>
+                                                                                            )
+                                                                                        }
+                                                                                        if (cus.cusName === item.ice) {
+                                                                                            return (
+                                                                                                <div key={item.ice+item.icePrice}>
+                                                                                                    - {item.ice}
+                                                                                                </div>
+                                                                                            )
+                                                                                        }
+                                                                                        if (cus.cusName === item.milk) {
+                                                                                            return (
+                                                                                                <div key={item.milk+item.milkPrice}>
+                                                                                                    - {item.milk}
+                                                                                                </div>
+                                                                                            )
+                                                                                        }
+                                                                                    })}
+                                                                                </div>
+                                                                            ))}
+                                                                        </div>
+                                                                        <div>
+                                                                            <h5 className="font-semibold">Memo</h5>
+                                                                            <p>{order.memo}</p>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    )}
+                                                </>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                </CardContent>
+                                <CardFooter>
+                                    <div className="text-xs text-muted-foreground">
+                                        Showing <strong>{filteredOrders?.length}</strong> orders
+                                    </div>
+                                </CardFooter>
+                            </Card>
+                        </TabsContent>
+                        <TabsContent value="completed">
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Orders</CardTitle>
+                                    <CardDescription>
+                                        Manage your orders.
+                                    </CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                    <Table>
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead className="w-[100px]">Order Number</TableHead>
+                                                <TableHead>Total Price</TableHead>
+                                                <TableHead>Customer Name</TableHead>
+                                                <TableHead>Order Date</TableHead>
+                                                <TableHead>Status</TableHead>
+                                                <TableHead>Get Points</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {filteredOrders?.map((order) => (
+                                                <>
+                                                    <TableRow key={order._id} className="cursor-pointer" onClick={() => toggleRow(order._id)}>
+                                                        <TableCell className="font-medium">#{order.orderNumber}</TableCell>
+                                                        <TableCell>${order.totalPrice.toFixed(2)}</TableCell>
+                                                        <TableCell>{order.customerName}</TableCell>
+                                                        <TableCell>{new Date(order.createdAt).toLocaleString()}</TableCell>
+                                                        <TableCell>
+                                                            {userInformation.role === "ROLE_SUPERADMIN" && <Select
+                                                                defaultValue={order.orderStatus}
+                                                                onValueChange={(value) => {
+                                                                    handleStatusChange(order._id, value);
+                                                                    toast.success(`Order #${order.orderNumber} status has been changed to ${value}.`);
+                                                                }}
+                                                            >
+                                                                <SelectTrigger className="w-[130px]">
+                                                                    <SelectValue placeholder="Select status" />
+                                                                </SelectTrigger>
+                                                                <SelectContent>
+                                                                    <SelectItem value="processing">Processing</SelectItem>
+                                                                    <SelectItem value="completed">Completed</SelectItem>
+                                                                </SelectContent>
+                                                            </Select>}
+                                                            {userInformation.role === "ROLE_USER" && order.orderStatus.charAt(0).toUpperCase()+order.orderStatus.slice(1)}
+                                                        </TableCell>
+                                                        <TableCell>{order.pointsGet.toFixed(2)}</TableCell>
+                                                    </TableRow>
+                                                    {expandedRows.includes(order._id) && (
+                                                        <TableRow>
+                                                            <TableCell colSpan={7}>
+                                                                <div className="p-4 bg-muted/50">
+                                                                    <h4 className="font-semibold mb-2">Order Details</h4>
+                                                                    <div className="grid grid-cols-2 gap-20">
+                                                                        <div>
+                                                                            <h5 className="font-semibold">Items</h5>
+                                                                            {order.items.map((item, index) => (
+                                                                                <div key={index} className="flex flex-col">
+                                                                                    <div className="flex w-full justify-between">
+                                                                                        <div>
+                                                                                            {item.product.name} * {item.amount}
+                                                                                        </div>
+                                                                                        <div>Price: ${item.price.toFixed(2)}</div>
+                                                                                    </div>
+
+                                                                                    {item.product.customizations?.map(cus => {
+                                                                                        if (cus.cusName === item.size) {
+                                                                                            return (
+                                                                                                <div key={item.size+item.sizePrice}>
+                                                                                                    - {item.size}
+                                                                                                </div>
+                                                                                            )
+                                                                                        }
+                                                                                        if (cus.cusName === item.ice) {
+                                                                                            return (
+                                                                                                <div key={item.ice+item.icePrice}>
+                                                                                                    - {item.ice}
+                                                                                                </div>
+                                                                                            )
+                                                                                        }
+                                                                                        if (cus.cusName === item.milk) {
+                                                                                            return (
+                                                                                                <div key={item.milk+item.milkPrice}>
+                                                                                                    - {item.milk}
+                                                                                                </div>
+                                                                                            )
+                                                                                        }
+                                                                                    })}
+                                                                                </div>
+                                                                            ))}
+                                                                        </div>
+                                                                        <div>
+                                                                            <h5 className="font-semibold">Memo</h5>
+                                                                            <p>{order.memo}</p>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    )}
+                                                </>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                </CardContent>
+                                <CardFooter>
+                                    <div className="text-xs text-muted-foreground">
+                                        Showing <strong>{filteredOrders?.length}</strong> orders
+                                    </div>
+                                </CardFooter>
+                            </Card>
+                        </TabsContent>
+                    </Tabs>
+                </main>
             </div>
-
-            <div className="bg-white rounded-lg border shadow-sm">
-                <div className="p-4">
-                    <h1 className="text-2xl font-semibold">Orders</h1>
-                    <p className="text-muted-foreground">Manage your orders.</p>
-                </div>
-
-                <div className="px-4 py-3 border-t flex gap-4">
-                    <div>
-                        <Label htmlFor="startDate">Start Date</Label>
-                        <Input
-                            type="date"
-                            id="startDate"
-                            value={startDate}
-                            onChange={(e) => setStartDate(e.target.value)}
-                            className="w-[160px]"
-                        />
-                    </div>
-                    <div>
-                        <Label htmlFor="endDate">End Date</Label>
-                        <Input
-                            type="date"
-                            id="endDate"
-                            value={endDate}
-                            onChange={(e) => setEndDate(e.target.value)}
-                            className="w-[160px]"
-                        />
-                    </div>
-                </div>
-
-                <div className="overflow-x-auto">
-                    <table className="w-full">
-                        <thead>
-                        <tr className="border-t">
-                            <th className="text-left p-4 font-medium">Order Number</th>
-                            <th className="text-left p-4 font-medium">Total Price</th>
-                            <th className="text-left p-4 font-medium">Customer Name</th>
-                            <th className="text-left p-4 font-medium">Order Date</th>
-                            <th className="text-left p-4 font-medium">Status</th>
-                            <th className="text-left p-4 font-medium"></th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {filteredOrders?.map(order => (
-                            <>
-                                <tr
-                                    key={order._id}
-                                    className="border-t hover:bg-muted/50 cursor-pointer"
-                                    onClick={() => toggleRow(order._id)}
-                                >
-                                    <td className="p-4">
-                                        <div className="flex items-center gap-3">
-                                            <span className="font-medium">#{order.orderNumber}</span>
-                                        </div>
-                                    </td>
-                                    <td className="p-4">${order.totalPrice}</td>
-                                    <td className="p-4">{order.customerName}</td>
-                                    <td className="p-4">{new Date(order.createdAt).toLocaleString()}</td>
-                                    <td className="p-4">
-                                        <Select defaultValue={order.orderStatus}>
-                                            <SelectTrigger className="w-[130px]">
-                                                <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="processing">Processing</SelectItem>
-                                                <SelectItem value="completed">Completed</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    </td>
-                                    <td className="p-4">
-                                        <div className="flex items-center gap-2">
-                                            {expandedRows.includes(order._id) ?
-                                                <ChevronUp className="h-4 w-4" /> :
-                                                <ChevronDown className="h-4 w-4" />
-                                            }
-                                        </div>
-                                    </td>
-                                </tr>
-                                {expandedRows.includes(order._id) && (
-                                    <tr className="bg-muted/50">
-                                        <td colSpan={7} className="p-4">
-                                            <div className="grid grid-cols-2 gap-4">
-                                                <div>
-                                                    <Label>Items</Label>
-                                                    {order.items.map(item => {
-                                                        return (<ul className="mt-1 space-y-1" key={item.product._id}>
-                                                            {item.product.name}
-                                                        </ul>)
-                                                    })
-                                                    }
-                                                </div>
-                                                <div>
-                                                    <Label>Memo</Label>
-                                                    <p className="mt-1">{order.memo}</p>
-                                                </div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                )}
-                            </>
-                        ))}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    )
+        </div>)
 }

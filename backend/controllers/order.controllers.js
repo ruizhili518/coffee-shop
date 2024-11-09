@@ -130,3 +130,16 @@ export const getOrderHistory = async (req,res) => {
         res.status(500).json({message: "Something wrong with the server."})
     }
 }
+export const changeOrderStatus = async (req,res) => {
+    try{
+        const {id, newStatus} = req.body;
+        const thisOrder = await Order.findByIdAndUpdate({_id: id},{orderStatus: newStatus}, {new:true});
+        if(!thisOrder){
+            return res.status(404).json({message:'Order Not Found.'})
+        }
+        res.status(200).json({message: "Order status changed."})
+    }catch (e) {
+        console.log(e);
+        res.status(500).json({message: "Something wrong with the server."})
+    }
+}

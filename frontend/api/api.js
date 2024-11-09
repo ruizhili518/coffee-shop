@@ -119,4 +119,12 @@ export const getOrders = (value) => {
         method: 'POST',
         data: value
     })
+};
+
+export const changeOrderStatus = (value) => {
+    return http.request({
+        url: '/order/change-order-status',
+        method: 'POST',
+        data: value
+    })
 }
