@@ -127,4 +127,11 @@ export const changeOrderStatus = (value) => {
         method: 'POST',
         data: value
     })
+};
+
+export const getOrderDataAnalysis = () => {
+    return http.request({
+        url: '/order/order-data',
+        method: 'GET'
+    })
 }

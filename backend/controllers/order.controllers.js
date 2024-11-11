@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import Order from "../models/order.model.js";
 import Counter from "../models/counter.model.js";
 import Points from "../models/points.model.js";
+import moment from 'moment';
 
 dotenv.config();
 
@@ -141,5 +142,66 @@ export const changeOrderStatus = async (req,res) => {
     }catch (e) {
         console.log(e);
         res.status(500).json({message: "Something wrong with the server."})
+    }
+}
+export const getOrderDataAnalysis = async (req,res) => {
+    try{
+        const today = moment().startOf('day');
+        const now = moment().startOf('second');
+        const sevenDaysAgo = moment().subtract(7, 'days').startOf('second');
+
+        // 1. Recent 7 days' revenue
+        const recentRevenue = await Order.aggregate([
+            { $match: { createdAt: { $gte: sevenDaysAgo.toDate(), $lte: now.toDate() } } },
+            { $group: { _id: null, total: { $sum: '$totalPrice' } } },
+            { $project: { _id: 0, total: 1 } }
+        ]);
+        const recent7DaysRevenue = recentRevenue[0]?.total || 0;
+
+        // 2. Increase/decrease of 7 days' revenue from last 7 days
+        const prev7DaysStart = moment().subtract(14, 'days').startOf('second');
+        const prev7DaysRevenue = await Order.aggregate([
+            { $match: { createdAt: { $gte: prev7DaysStart.toDate(), $lte: sevenDaysAgo.toDate() } } },
+            { $group: { _id: null, total: { $sum: '$totalPrice' } } },
+            { $project: { _id: 0, total: 1 } }
+        ]);
+        const prev7DaysRevenueTotal = prev7DaysRevenue[0]?.total || 0;
+        const revenueChange = Number((recent7DaysRevenue - prev7DaysRevenueTotal).toFixed(2));
+
+        // 3. Today's revenue
+        const todayRevenue = await Order.aggregate([
+            { $match: { createdAt: { $gte: today.toDate(), $lte: moment(today).endOf('day').toDate() } } },
+            { $group: { _id: null, total: { $sum: '$totalPrice' } } },
+            { $project: { _id: 0, total: 1 } }
+        ]);
+        const todaysRevenue = todayRevenue[0]?.total || 0;
+
+        // 4. Increase/decrease from yesterday
+        const yesterday = moment().subtract(1, 'day').startOf('day');
+        const yesterdayRevenue = await Order.aggregate([
+            { $match: { createdAt: { $gte: yesterday.toDate(), $lte: moment(yesterday).endOf('day').toDate() } } },
+            { $group: { _id: null, total: { $sum: '$totalPrice' } } },
+            { $project: { _id: 0, total: 1 } }
+        ]);
+        const yesterdaysRevenue = yesterdayRevenue[0]?.total || 0;
+        const todayRevenueChange = Number((todaysRevenue - yesterdaysRevenue).toFixed(2));
+
+        // 5. Today's orders
+        const todaysOrders = await Order.countDocuments({ createdAt: { $gte: today.toDate(), $lte: moment(today).endOf('day').toDate() } });
+
+        // 6. Increase/decrease from yesterday
+        const yesterdaysOrders = await Order.countDocuments({ createdAt: { $gte: yesterday.toDate(), $lte: moment(yesterday).endOf('day').toDate() } });
+        const orderChange = Number((todaysOrders - yesterdaysOrders));
+        const data = {
+            recent7DaysRevenue,
+            revenueChange,
+            todaysRevenue,
+            todayRevenueChange,
+            todaysOrders,
+            orderChange
+        };
+        return res.status(200).json({message: "Order's data analysis.", data})
+    }catch (e) {
+        return res.status(500).json({ error: e.message });
     }
 }

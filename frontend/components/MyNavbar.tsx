@@ -75,7 +75,7 @@ const Navbar = () => {
         [ "/" , "Home"], [ "/menu", "Menu"] , [ "/" , "Order History" ]
     ];
     const superAdminMenu = [
-        [ "/" , "Home"], [ "/menu", "Menu"] , [ "/order-history" , "Order History" ], [ "/product" , "Manage Product" ] , [ "/store", "Manage Store"]
+        [ "/" , "Home"], [ "/menu", "Menu"] , [ "/order-history" , "All Orders" ], [ "/product" , "Manage Product" ] , [ "/store", "Manage Store"]
     ];
 
     const [menu, setMenu] = useState(userMenu);
@@ -158,7 +158,7 @@ const Navbar = () => {
                             <DropdownMenuContent align="end">
                                 <DropdownMenuLabel>Hi! {userInformation.customerName}</DropdownMenuLabel>
                                 <DropdownMenuSeparator />
-                                <DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => router.push("/order-history")}>
                                     Order History
                                 </DropdownMenuItem>
                                 <DropdownMenuItem>
@@ -208,7 +208,7 @@ const Navbar = () => {
                             <DropdownMenuContent align="end">
                                 <DropdownMenuLabel>Hi! {userInformation.customerName}</DropdownMenuLabel>
                                 <DropdownMenuSeparator />
-                                <DropdownMenuItem>Order History</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => router.push("/order-history")}>Order History</DropdownMenuItem>
                                 <DropdownMenuItem>My Account</DropdownMenuItem>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem onClick={toggleModal}>Sign Out</DropdownMenuItem>

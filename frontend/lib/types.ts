@@ -47,3 +47,13 @@ export type Item = {
     time: number,
     _id: string
 }
+
+export type OrderData = {
+    recent7DaysRevenue: number,
+    revenueChange: '84.98',
+    todaysRevenue: 0,
+    todayRevenueChange: '-35.50',
+    todaysOrders: 0,
+    orderChange: '-2.00'
+
+}
