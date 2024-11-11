@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import Order from "../models/order.model.js";
 import Counter from "../models/counter.model.js";
 import Points from "../models/points.model.js";
+import User from "../models/user.model.js";
 import moment from 'moment';
 
 dotenv.config();
@@ -90,8 +91,17 @@ export const checkSuccess = async (req,res) => {
                 items:cart,
                 orderNumber,
                 sessionId
-            })
+            });
             await newOrder.save();
+            if(newOrder.userId !== 0){
+                await User.findOneAndUpdate(
+                    {userId: newOrder.userId},
+                    {
+                        $inc: {points: newOrder.pointsGet}
+                    },
+                    {new: true}
+                )
+            }
             res.status(200).json({
                 success: true,
                 message: "Payment successful, order created.",
