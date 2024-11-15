@@ -161,8 +161,8 @@ const Navbar = () => {
                                 <DropdownMenuItem onClick={() => router.push("/order-history")}>
                                     Order History
                                 </DropdownMenuItem>
-                                <DropdownMenuItem>
-                                    My Account
+                                <DropdownMenuItem onClick={() => router.push("/profile")}>
+                                    My Profile
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem onClick={toggleModal}>
@@ -209,7 +209,7 @@ const Navbar = () => {
                                 <DropdownMenuLabel>Hi! {userInformation.customerName}</DropdownMenuLabel>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem onClick={() => router.push("/order-history")}>Order History</DropdownMenuItem>
-                                <DropdownMenuItem>My Account</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => router.push("/profile")}>My Profile</DropdownMenuItem>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem onClick={toggleModal}>Sign Out</DropdownMenuItem>
                             </DropdownMenuContent>

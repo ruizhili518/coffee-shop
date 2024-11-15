@@ -86,8 +86,8 @@ export const checkSuccess = async (req,res) => {
                 userId: session.metadata.userId,
                 memo:session.metadata.memo,
                 totalPrice: session.metadata.totalPrice,
-                pointsRedeem: session.metadata.pointsRedeem,
-                pointsGet: (session.metadata.totalPrice - session.metadata.appliedDiscount) * getPointsRatio.ratio,
+                pointsRedeem: session.metadata.pointsToRedeem,
+                pointsGet: ((session.metadata.totalPrice - session.metadata.appliedDiscount) * getPointsRatio.ratio).toFixed(2),
                 items:cart,
                 orderNumber,
                 sessionId
@@ -97,7 +97,7 @@ export const checkSuccess = async (req,res) => {
                 await User.findOneAndUpdate(
                     {userId: newOrder.userId},
                     {
-                        $inc: {points: newOrder.pointsGet}
+                        $inc: {points: (newOrder.pointsGet - newOrder.pointsRedeem)}
                     },
                     {new: true}
                 )

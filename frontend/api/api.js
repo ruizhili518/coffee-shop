@@ -23,6 +23,14 @@ export const signOut = () => {
     })
 };
 
+export const editProfileName = (value) => {
+    return http.request({
+        url: '/auth/profile-name',
+        method: 'POST',
+        data: value
+    })
+}
+
 export const getProfile = () => {
     return http.request({
         url: '/auth/profile',

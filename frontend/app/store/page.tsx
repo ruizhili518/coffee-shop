@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import {getGetPointRatio, getRedeemPointRatio, manageGetPointsRatio, manageRedeemPointsRatio} from "@/api/api";
 import {useEffect, useState} from "react";
 import LoadingPage from "@/components/LoadingPage";
+import {toast} from "sonner";
 
 const Page = () => {
     const [getRatio, setGetRatio] = useState(0);
@@ -36,6 +37,7 @@ const Page = () => {
     const manageGetRatioHandler = async () => {
         try {
             await manageGetPointsRatio({getRatio});
+            toast.success(`Get points ratio set to ${getRatio}.`)
         }catch (e){
             console.log(e);
         }
@@ -43,6 +45,7 @@ const Page = () => {
     const manageRedeemRatioHandler = async () => {
         try {
             await manageRedeemPointsRatio({redeemRatio});
+            toast.success(`Redeem points ratio set to ${redeemRatio}.`)
         }catch (e){
             console.log(e);
         }
@@ -71,8 +74,8 @@ const Page = () => {
                 </CardHeader>
                 <CardContent>
                     <Input placeholder="Get Points Ratio" defaultValue={getRatio} onChange={(e) => {
-                                    setGetRatio(Number(e.target.value))
-                                }}/>
+                        setGetRatio(Number(e.target.value))
+                    }}/>
                 </CardContent>
                 <CardFooter className="border-t px-6 py-4">
                     <Button onClick={manageGetRatioHandler}>Save</Button>

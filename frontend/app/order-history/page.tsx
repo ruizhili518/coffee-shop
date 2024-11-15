@@ -14,17 +14,20 @@ import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/c
 import { toast } from "sonner";
 import { DollarSign, ShoppingCart, TrendingUp } from "lucide-react"
 
-const recentRevenue = 12500
-const todayRevenue = 2100
-const todayOrders = 45
-
 export default function OrderHistory() {
     const userInformation = useAppSelector((state) => state.authReducer.value);
     const [isLoading, setIsLoading] = useState(true);
     const [orders, setOrders] = useState<Order[]>([]);
     const [proOrder, setProOrder] = useState<Order[]>([]);
     const [comOrder, setComOrder] = useState<Order[]>([]);
-    const [orderData, setOrderData] = useState<OrderData>();
+    const [orderData, setOrderData] = useState<OrderData>({
+        recent7DaysRevenue: 0,
+        revenueChange: 0,
+        todaysRevenue: 0,
+        todayRevenueChange: 0,
+        todaysOrders: 0,
+        orderChange: 0
+    });
     const [activeTab, setActiveTab] = useState('all')
     const [startDate, setStartDate] = useState('')
     const [endDate, setEndDate] = useState('')
@@ -50,15 +53,11 @@ export default function OrderHistory() {
         userInformation.role === "ROLE_SUPERADMIN" && getOrderDA();
         setIsLoading(false);
     }, [userInformation , isLoading]);
-
-
-
     const toggleRow = (orderId: string) => {
         setExpandedRows(prev =>
             prev.includes(orderId) ? prev.filter(id => id !== orderId) : [...prev, orderId]
         )
     };
-
     const filteredOrders = orders?.filter(order => {
         if (activeTab !== 'all' && order.orderStatus !== activeTab) return false
         if (startDate && new Date(order.createdAt) < new Date(startDate)) return false
@@ -86,7 +85,7 @@ export default function OrderHistory() {
                                 </CardHeader>
                                 <CardContent>
                                     <div className="text-2xl font-bold">$ {orderData?.recent7DaysRevenue}</div>
-                                    <p className="text-xs text-muted-foreground">{orderData?.revenueChange > 0 ? `+ ${orderData?.revenueChange}`: `${orderData?.revenueChange}`} from last week</p>
+                                    <p className="text-xs text-muted-foreground">{orderData?.revenueChange > 0 ? `+${orderData?.revenueChange}`: `${orderData?.revenueChange}`} from last week</p>
                                 </CardContent>
                             </Card>
                             <Card className="flex-1">
@@ -96,7 +95,7 @@ export default function OrderHistory() {
                                 </CardHeader>
                                 <CardContent>
                                     <div className="text-2xl font-bold">$ {orderData?.todaysRevenue}</div>
-                                    <p className="text-xs text-muted-foreground">{orderData?.todayRevenueChange > 0 ? `+ ${orderData?.todayRevenueChange}`: `${orderData?.todayRevenueChange}`} from yesterday</p>
+                                    <p className="text-xs text-muted-foreground">{orderData?.todayRevenueChange > 0 ? `+${orderData?.todayRevenueChange}`: `${orderData?.todayRevenueChange}`} from yesterday</p>
                                 </CardContent>
                             </Card>
                             <Card className="flex-1">
@@ -106,7 +105,7 @@ export default function OrderHistory() {
                                 </CardHeader>
                                 <CardContent>
                                     <div className="text-2xl font-bold">{orderData?.todaysOrders}</div>
-                                    <p className="text-xs text-muted-foreground">{orderData?.orderChange > 0 ? `+ ${orderData?.orderChange}`: `${orderData?.orderChange}`} orders from yesterday</p>
+                                    <p className="text-xs text-muted-foreground">{orderData?.orderChange > 0 ? `+${orderData?.orderChange}`: `${orderData?.orderChange}`} orders from yesterday</p>
                                 </CardContent>
                             </Card>
                         </div>

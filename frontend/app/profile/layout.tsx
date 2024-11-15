@@ -1,17 +1,18 @@
-import {ReactNode} from 'react';
+import { ReactNode } from 'react';
 import NavBar from '@/components/MyNavbar';
 import Footer from "@/components/Footer";
 import { Toaster } from "@/components/ui/sonner";
 
-const StoreLayout = ({ children }: Readonly<{ children: ReactNode }>) => {
+
+const ProfileLayout = ({ children }: Readonly<{ children: ReactNode }>) => {
     return (
-        <>
+        <div>
             <NavBar/>
             {children}
-            <Footer/>
             <Toaster/>
-        </>
-    )
+            <Footer/>
+        </div>
+    );
 };
 
-export default StoreLayout;
+export default ProfileLayout;

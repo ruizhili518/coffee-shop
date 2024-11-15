@@ -58,8 +58,7 @@ const setCookies = (res, accessToken, refreshToken) => {
         maxAge: 1000 * 60 * 60 * 24 * 7, // expire in 7days
         path:"/"
     })
-
-    //TODO: Modify back to production mode before deploy.
+    //TODO: Modify to production mode before deploy.
 }
 
 export const signup = async (req, res) => {
@@ -177,5 +176,21 @@ export const getProfile = async (req, res) => {
     }catch (err){
         console.log(err);
         res.status(500).json({message: "Something wrong."})
+    }
+}
+
+export const editProfileName = async (req,res) => {
+    try{
+        const {userId, newCustomerName} = req.body;
+        const newUser = await User.findOneAndUpdate(
+            {userId},
+            {
+                customerName: newCustomerName
+            },
+            {new: true}
+        )
+        res.status(200).json({newUser, message: "Customer name has been changed successfully."})
+    } catch (e) {
+        res.status(500).json({message: "Something wrong with the server. Please try later.",error:e.message});
     }
 }
