@@ -222,7 +222,7 @@ const Page = ({ params }: { params: { manageById: string } }) => {
             });
             setPreviewURL(productData.image);
         }
-    }, [productData]);
+    }, [methods, productData]);
 
     if(isLoading){
         return <LoadingPage/>
@@ -421,7 +421,7 @@ const Page = ({ params }: { params: { manageById: string } }) => {
                                                     }) :
                                                     <TableRow>
                                                         <TableCell>
-                                                            Press "Add Variant" to customizations.
+                                                            Press &quot;Add Variant&quot; to customizations.
                                                         </TableCell>
                                                     </TableRow>
                                                 }

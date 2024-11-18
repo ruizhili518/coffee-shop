@@ -282,8 +282,8 @@ const MenuPage = () => {
                                                     </SheetTitle>
                                                     {
                                                         uniqueCusCategories[0] !== "" &&
-                                                        uniqueCusCategories.map((category, index) => (
-                                                            <SheetDescription className="flex flex-col">
+                                                        uniqueCusCategories.map((category) => (
+                                                            <SheetDescription className="flex flex-col" key={category}>
                                                                 <Badge className="flex w-16 justify-center mb-4"
                                                                        variant="outline">
                                                                     {category}
@@ -298,7 +298,9 @@ const MenuPage = () => {
                                                                             {sizeCus.map(customization => {
                                                                                 return (
                                                                                     <div
-                                                                                        className="flex items-center space-x-2">
+                                                                                        className="flex items-center space-x-2"
+                                                                                        key={customization.cusName}
+                                                                                    >
                                                                                         <RadioGroupItem
                                                                                             value={customization.cusName}
                                                                                             id={customization.cusName}/>
@@ -323,7 +325,9 @@ const MenuPage = () => {
                                                                             {iceCus.map(customization => {
                                                                                 return (
                                                                                     <div
-                                                                                        className="flex items-center space-x-2">
+                                                                                        className="flex items-center space-x-2"
+                                                                                        key={customization.cusName}
+                                                                                    >
                                                                                         <RadioGroupItem
                                                                                             value={customization.cusName}
                                                                                             id={customization.cusName}/>
@@ -348,7 +352,9 @@ const MenuPage = () => {
                                                                             {milkCus.map(customization => {
                                                                                 return (
                                                                                     <div
-                                                                                        className="flex items-center space-x-2">
+                                                                                        className="flex items-center space-x-2"
+                                                                                        key={customization.cusName}
+                                                                                    >
                                                                                         <RadioGroupItem
                                                                                             value={customization.cusName}
                                                                                             id={customization.cusName}/>

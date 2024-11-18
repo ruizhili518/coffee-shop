@@ -43,27 +43,6 @@ const Navbar = () => {
     const dispatch = useDispatch<AppDispatch>();
     const router = useRouter();
 
-    // Get the user information if signed in and use store in redux slice.
-    const getUserInfo = async () => {
-        try {
-            const res = await getProfile();
-            if(res.data.user){
-                const userInfo : AuthState = {
-                    username: res.data.user.username,
-                    userId: res.data.user.userId,
-                    customerName : res.data.user.customerName,
-                    orderHistory: res.data.user.orderHistory,
-                    email : res.data.user.email,
-                    points : res.data.user.points,
-                    role: res.data.user.role,
-                }
-                dispatch(signInAuth(userInfo));
-            }
-        }catch (err){
-            console.log('No user', err);
-        }
-    }
-
     // Get user from redux.
     let userInformation = useAppSelector((state) => state.authReducer.value);
 
@@ -100,8 +79,28 @@ const Navbar = () => {
 
     // Initialization of the navbar.
     useEffect(()=> {
+        // Get the user information if signed in and use store in redux slice.
+        const getUserInfo = async () => {
+            try {
+                const res = await getProfile();
+                if(res.data.user){
+                    const userInfo : AuthState = {
+                        username: res.data.user.username,
+                        userId: res.data.user.userId,
+                        customerName : res.data.user.customerName,
+                        orderHistory: res.data.user.orderHistory,
+                        email : res.data.user.email,
+                        points : res.data.user.points,
+                        role: res.data.user.role,
+                    }
+                    dispatch(signInAuth(userInfo));
+                }
+            }catch (err){
+                console.log('No user', err);
+            }
+        }
         getUserInfo();
-    }, []);
+    }, [dispatch]);
 
     // Refresh menu item when userInformation changed.
     useEffect(()=> {
@@ -112,7 +111,7 @@ const Navbar = () => {
         }else{
             setMenu(superAdminMenu);
         }
-    },[userInformation]);
+    },[adminMenu, superAdminMenu, userInformation, userMenu]);
 
     return (
         <section className="flex justify-center py-6">

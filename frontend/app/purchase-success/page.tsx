@@ -24,18 +24,17 @@ const PurchaseSuccessPage = () => {
 
     const userInformation = useAppSelector((state) => state.authReducer.value);
 
-    const checkoutSuccess = async () => {
-        const data = {sessionId,cart};
-        const res = await checkSuccess(data);
-        setOrderNumber(res.data.orderNumber);
-        setCustomerName(res.data.customerName);
-    }
-
     useEffect(() => {
+        const checkoutSuccess = async () => {
+            const data = {sessionId,cart};
+            const res = await checkSuccess(data);
+            setOrderNumber(res.data.orderNumber);
+            setCustomerName(res.data.customerName);
+        }
         checkoutSuccess();
         dispatch(initialCart());
         setIsLoading(false);
-    }, []);
+    }, [cart, dispatch, sessionId]);
 
     if(isLoading){
         return <LoadingPage/>

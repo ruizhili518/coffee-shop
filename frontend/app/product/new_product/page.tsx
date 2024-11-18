@@ -374,7 +374,7 @@ const Page = () => {
                                             }) :
                                             <TableRow>
                                                 <TableCell>
-                                                    Press "Add Variant" to customizations.
+                                                    Press &quot;Add Variant&quot; to customizations.
                                                 </TableCell>
                                             </TableRow>
                                         }
