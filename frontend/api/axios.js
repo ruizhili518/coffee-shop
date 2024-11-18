@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const baseURL = 'http://localhost:5001/api';
+const baseURL = 'https://eunnikoo-api.vercel.app:5001/api';
 
 //Create a class to make axios instance and send request.
 
