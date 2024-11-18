@@ -18,22 +18,11 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-const allowedOrigins = [process.env.FRONTEND_URL];
-const corsOptions = {
-    origin: function (origin, callback) {
-        if (allowedOrigins.includes(origin)) {
-            callback(null, true);
-        } else {
-            callback(new Error(`Not allowed by CORS: ${origin}`));
-        }
-    },
-    credentials: true
-};
-
-//TODO: Double check this cors problem before deploy ( solve local cookie problem ).
-
 //Middle wares
-app.use(cors(corsOptions)); // Allow CORS.
+app.use(cors({
+    origin: true, // Allow all origins
+    credentials: true
+})); // Allow CORS.
 app.use(express.json()); // Parse request body.
 app.use(cookieParser());
 
