@@ -111,7 +111,7 @@ const Navbar = () => {
         }else{
             setMenu(superAdminMenu);
         }
-    },[adminMenu, superAdminMenu, userInformation, userMenu]);
+    },[userInformation]);
 
     return (
         <section className="flex justify-center py-6">
