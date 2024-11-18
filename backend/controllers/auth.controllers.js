@@ -2,7 +2,6 @@ import User from "../models/user.model.js";
 import Counter from "../models/counter.model.js";
 import jwt from "jsonwebtoken";
 import redis from "../lib/redis.js";
-
 // Get userId sequence and update it by 1.
 async function getNextSequenceValue(sequenceName){
     const sequenceDocument = await Counter.findOneAndUpdate(
@@ -12,7 +11,6 @@ async function getNextSequenceValue(sequenceName){
     );
     return sequenceDocument.seq;
 }
-
 // Rollback userId sequence by 1 while error.
 async function rollBackSequenceValue(sequenceName){
     const sequenceDocument = await Counter.findOneAndUpdate(
@@ -22,7 +20,6 @@ async function rollBackSequenceValue(sequenceName){
     );
     return sequenceDocument.seq;
 }
-
 // Generate a token based on user._id.
 const generateToken = (uniqueId) => {
     const accessToken = jwt.sign({uniqueId}, process.env.JWT_ACCESS_SECRET, {
@@ -35,12 +32,10 @@ const generateToken = (uniqueId) => {
 
     return {accessToken, refreshToken};
 }
-
 // Store refreshToken to redis.
 const storeRefreshToken = async (uniqueId, refreshToken) => {
     await redis.set(`refresh_token:${uniqueId}`, refreshToken,"EX",7 * 24 * 60 * 60); // Expire in 7d.
 }
-
 // Set cookies.
 const setCookies = (res, accessToken, refreshToken) => {
     res.cookie("access_token", accessToken, {
@@ -60,7 +55,6 @@ const setCookies = (res, accessToken, refreshToken) => {
     })
     //TODO: Modify to production mode before deploy.
 }
-
 export const signup = async (req, res) => {
     const { username, password, email, customerName } =  req.body;
 
@@ -94,7 +88,6 @@ export const signup = async (req, res) => {
         }
     }
 }
-
 export const signin = async (req, res) => {
     try{
         const { username , password } =  req.body;
@@ -112,7 +105,6 @@ export const signin = async (req, res) => {
         res.status(500).json({message: err.message});
     }
 }
-
 export const signout = async (req, res) => {
     try{
         const tokenFromUser = req.cookies.refresh_token;
@@ -128,7 +120,6 @@ export const signout = async (req, res) => {
         res.status(500).json({message: 'Server error', error: err.message});
     }
 }
-
 export const refreshToken = async (req, res) => {
     try {
         const refreshToken = req.cookies.refresh_token;
@@ -160,7 +151,6 @@ export const refreshToken = async (req, res) => {
         res.status(500).json({message: err.message});
     }
 }
-
 export const getProfile = async (req, res) => {
     try {
         const tokenFromUser = req.cookies.refresh_token;
@@ -178,7 +168,6 @@ export const getProfile = async (req, res) => {
         res.status(500).json({message: "Something wrong."})
     }
 }
-
 export const editProfileName = async (req,res) => {
     try{
         const {userId, newCustomerName} = req.body;
