@@ -12,7 +12,7 @@ import {checkSuccess} from "@/api/api";
 import {initialCart} from "@/lib/features/cartSlice";
 import LoadingPage from "@/components/LoadingPage";
 
-const PurchaseSuccessPage = () => {
+const PurchaseSuccessContent = () => {
     const router = useRouter();
     const dispatch = useDispatch<AppDispatch>();
     const searchParams = useSearchParams();
@@ -37,10 +37,9 @@ const PurchaseSuccessPage = () => {
     }, [cart, dispatch, sessionId]);
 
     if(isLoading){
-        return <Suspense><LoadingPage/></Suspense>
+        return <LoadingPage/>
     }
     return (
-        <Suspense>
         <div className="flex items-center justify-center p-8">
             <Card className="w-full max-w-md">
                 <CardContent className="pt-6 px-6 pb-8 flex flex-col items-center text-center">
@@ -71,6 +70,13 @@ const PurchaseSuccessPage = () => {
                 </CardContent>
             </Card>
         </div>
+    );
+};
+
+const PurchaseSuccessPage = () => {
+    return (
+        <Suspense fallback={<LoadingPage />}>
+            <PurchaseSuccessContent />
         </Suspense>
     );
 };
