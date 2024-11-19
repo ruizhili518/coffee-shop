@@ -46,7 +46,6 @@ export default function OrderHistory() {
 
         const getOrderDA = async () => {
             const res = await getOrderDataAnalysis();
-            console.log(res.data.data);
             setOrderData(res.data.data);
         }
         getAllOrders();
@@ -84,7 +83,7 @@ export default function OrderHistory() {
                                     <TrendingUp className="h-4 w-4 text-muted-foreground"/>
                                 </CardHeader>
                                 <CardContent>
-                                    <div className="text-2xl font-bold">$ {orderData?.recent7DaysRevenue}</div>
+                                    <div className="text-2xl font-bold">$ {orderData?.recent7DaysRevenue.toFixed(2)}</div>
                                     <p className="text-xs text-muted-foreground">{orderData?.revenueChange > 0 ? `+${orderData?.revenueChange}`: `${orderData?.revenueChange}`} from last week</p>
                                 </CardContent>
                             </Card>
@@ -94,7 +93,7 @@ export default function OrderHistory() {
                                     <DollarSign className="h-4 w-4 text-muted-foreground"/>
                                 </CardHeader>
                                 <CardContent>
-                                    <div className="text-2xl font-bold">$ {orderData?.todaysRevenue}</div>
+                                    <div className="text-2xl font-bold">$ {orderData?.todaysRevenue.toFixed(2)}</div>
                                     <p className="text-xs text-muted-foreground">{orderData?.todayRevenueChange > 0 ? `+${orderData?.todayRevenueChange}`: `${orderData?.todayRevenueChange}`} from yesterday</p>
                                 </CardContent>
                             </Card>

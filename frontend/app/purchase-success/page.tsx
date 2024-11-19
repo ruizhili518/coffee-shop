@@ -34,7 +34,7 @@ const PurchaseSuccessContent = () => {
         checkoutSuccess();
         dispatch(initialCart());
         setIsLoading(false);
-    }, [cart, dispatch, sessionId]);
+    }, [dispatch, sessionId]);
 
     if(isLoading){
         return <LoadingPage/>
@@ -75,7 +75,7 @@ const PurchaseSuccessContent = () => {
 
 const PurchaseSuccessPage = () => {
     return (
-        <Suspense fallback={<LoadingPage />}>
+        <Suspense>
             <PurchaseSuccessContent />
         </Suspense>
     );
