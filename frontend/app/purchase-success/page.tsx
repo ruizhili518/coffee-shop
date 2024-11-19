@@ -7,7 +7,7 @@ import {useRouter} from "next/navigation";
 import {useDispatch} from "react-redux";
 import {AppDispatch, useAppSelector} from "@/lib/store";
 import { useSearchParams } from 'next/navigation';
-import {useEffect, useState} from "react";
+import {Suspense, useEffect, useState} from "react";
 import {checkSuccess} from "@/api/api";
 import {initialCart} from "@/lib/features/cartSlice";
 import LoadingPage from "@/components/LoadingPage";
@@ -37,9 +37,10 @@ const PurchaseSuccessPage = () => {
     }, [cart, dispatch, sessionId]);
 
     if(isLoading){
-        return <LoadingPage/>
+        return <Suspense><LoadingPage/></Suspense>
     }
     return (
+        <Suspense>
         <div className="flex items-center justify-center p-8">
             <Card className="w-full max-w-md">
                 <CardContent className="pt-6 px-6 pb-8 flex flex-col items-center text-center">
@@ -70,6 +71,7 @@ const PurchaseSuccessPage = () => {
                 </CardContent>
             </Card>
         </div>
+        </Suspense>
     );
 };
 
