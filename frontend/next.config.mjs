@@ -7,9 +7,6 @@ const nextConfig = {
                 hostname: 'res.cloudinary.com',
             },
         ],
-    },
-    experimental: {
-        missingSuspenseWithCSRBailout: false,
     }
 };
 
